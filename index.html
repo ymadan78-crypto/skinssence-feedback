@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Skinssence Laser & Skincare Clinic | Patient Feedback</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+          },
+          colors: {
+            rose: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              900: '#881337',
+              950: '#4c0519',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Canvas Confetti & QR Code -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      background-color: #faf8f5;
+    }
+    .rotate-180 {
+      transform: rotate(180deg);
+    }
+  </style>
+</head>
+<body class="text-stone-800 antialiased min-h-screen flex flex-col justify-between pb-28 selection:bg-rose-100 selection:text-rose-900">
+
+  <!-- Top Bar / Header -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 shadow-xs">
+    <div class="max-w-xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white shadow-sm font-serif font-bold text-lg">
+          S
+        </div>
+        <div>
+          <h1 class="font-serif font-semibold text-stone-900 tracking-tight text-sm sm:text-base leading-tight clinic-brand-name">
+            Skinssence Laser and Skincare Clinic
+          </h1>
+          <p class="text-[11px] text-stone-500 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+            Verified Patient Feedback & Reviews
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons (QR flyer & Settings) -->
+      <div class="flex items-center gap-1.5">
+        <button id="openQrModalBtn" title="QR Code & Reception Standee" class="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+        </button>
+        <button id="openAdminModalBtn" title="Clinic Settings" class="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Patient Flow Container -->
+  <main class="max-w-xl mx-auto w-full px-4 pt-4 pb-6 space-y-4 flex-1">
+    
+    <!-- Hero Greeting & Ease Prompt -->
+    <div class="text-center space-y-1">
+      <span class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200/60 shadow-xs">
+        <span class="text-rose-500">✨</span> 10 Seconds • Zero Typing Required
+      </span>
+      <h2 class="text-xl sm:text-2xl font-serif font-bold text-stone-900 pt-1">
+        How was your skin today?
+      </h2>
+      <p class="text-stone-500 text-xs max-w-sm mx-auto">
+        Tap a few quick choices below and our AI drafts a Google review for you!
+      </p>
+    </div>
+
+    <!-- Step 1: Overall Rating -->
+    <div class="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-sm space-y-1 text-center">
+      <div class="text-xs font-semibold text-stone-400 tracking-wider uppercase">
+        Step 1: Your Overall Experience
+      </div>
+      <div id="starRating" class="flex justify-center items-center gap-1.5 pt-1">
+        <!-- Rendered via JS -->
+      </div>
+      <p id="ratingDescription" class="text-xs font-medium text-amber-600 h-4">
+        🌟 Exceptional!
+      </p>
+    </div>
+
+    <!-- Step 2: Choose Treatment -->
+    <div class="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-sm space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-stone-400 tracking-wider uppercase">
+          Step 2: Treatment Received
+        </span>
+        <span class="text-[11px] text-stone-400">Select one</span>
+      </div>
+      <div id="treatmentChips" class="grid grid-cols-2 gap-2">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Step 3: What impressed you most? -->
+    <div class="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-sm space-y-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-stone-400 tracking-wider uppercase">
+          Step 3: What did you love most?
+        </span>
+        <span class="text-[11px] text-stone-400">Select 1 or more</span>
+      </div>
+      <div id="highlightChips" class="flex flex-wrap gap-1.5">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Optional Doctor Mention -->
+      <div class="pt-2.5 border-t border-stone-100 space-y-1.5">
+        <div class="text-xs text-stone-500 font-medium">
+          Doctor / Specialist (Optional)
+        </div>
+        <div id="doctorChips" class="flex flex-wrap gap-1.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- OPTIONAL EXPAND ACCORDION: City / Duration / Custom Note for Maximum SEO & Uniqueness -->
+    <div class="bg-white rounded-2xl border border-stone-200/90 shadow-sm overflow-hidden transition-all">
+      <button type="button" onclick="toggleExpandDetails()" class="w-full p-4 flex items-center justify-between text-left hover:bg-stone-50 transition-colors">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center text-xs font-bold">📍</span>
+          <div>
+            <div class="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+              <span>Your Location & Extra Details</span>
+              <span class="text-[10px] font-normal px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Optional</span>
+            </div>
+            <p class="text-[11px] text-stone-500">Add your city/area to personalize your review</p>
+          </div>
+        </div>
+        <svg id="expandChevronIcon" class="w-4 h-4 text-stone-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <!-- Expandable Body (Hidden by default so patients in a rush don't feel overwhelmed) -->
+      <div id="expandDetailsBody" class="hidden px-4 pb-4 pt-1 space-y-4 border-t border-stone-100 bg-stone-50/50">
+        
+        <!-- Location / City Chips -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-semibold text-stone-600">
+            <span>Which city / area do you belong to?</span>
+            <span class="text-[10px] text-stone-400">Boosts regional Google ranking</span>
+          </div>
+          <div id="locationChips" class="flex flex-wrap gap-1.5">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Duration of Concern -->
+        <div class="space-y-1.5">
+          <div class="text-xs font-semibold text-stone-600">
+            How long was your skin concern?
+          </div>
+          <div id="durationChips" class="flex flex-wrap gap-1.5">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Optional Free Writing Space -->
+        <div class="space-y-1.5">
+          <div class="text-xs font-semibold text-stone-600">
+            Any specific note you'd like included? (Optional)
+          </div>
+          <input type="text" oninput="handleCustomNoteInput(event)" class="w-full text-xs p-2.5 rounded-xl border border-stone-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="e.g. Loved Dr. Pooja's explanation, gentle cooling during laser, glowing for wedding...">
+        </div>
+
+      </div>
+    </div>
+
+    <!-- POSITIVE REVIEW SECTION (4-5 Stars) -->
+    <section id="positiveReviewSection" class="space-y-3">
+      <div class="flex items-center justify-between pt-1">
+        <div>
+          <h3 class="font-serif font-bold text-base sm:text-lg text-stone-900 flex items-center gap-1.5">
+            <span>✨</span> AI-Generated Google Review
+          </h3>
+          <p class="text-xs text-stone-500">Pick your favorite style or edit before posting</p>
+        </div>
+        <button onclick="regenerateReviews()" class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors border border-rose-200">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Regenerate
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="aiLoadingIndicator" class="hidden text-center py-3 text-xs font-medium text-stone-500">
+        <div class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-rose-500 border-t-transparent mr-2"></div>
+        Crafting humanized, SEO-optimized review...
+      </div>
+
+      <!-- 3 AI Review Variations Cards -->
+      <div id="reviewsCardsContainer" class="space-y-2.5 transition-opacity duration-200">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Review Preview & Quick Touch-up Editor -->
+      <div class="bg-white rounded-2xl p-4 border border-stone-200 shadow-sm space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label for="activeReviewTextarea" class="text-xs font-semibold text-stone-600 uppercase tracking-wide">
+            Your Selected Review Text
+          </label>
+          <span class="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Ready to Post
+          </span>
+        </div>
+        <textarea id="activeReviewTextarea" oninput="handleEditorChange(event)" rows="3" class="w-full text-xs sm:text-sm text-stone-800 p-2.5 rounded-xl border border-stone-200 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:outline-none transition-all leading-relaxed" placeholder="Review will appear here..."></textarea>
+      </div>
+    </section>
+
+    <!-- PRIVATE RESOLUTION SECTION (1-3 Stars) - Shielding clinic from negative public reviews -->
+    <section id="privateFeedbackSection" class="hidden bg-amber-50/70 border border-amber-200 rounded-2xl p-5 space-y-3 text-stone-800">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0 text-lg">
+          💬
+        </div>
+        <div>
+          <h4 class="font-serif font-bold text-stone-900 text-base">We are sincerely sorry</h4>
+          <p class="text-xs text-stone-600 leading-relaxed mt-0.5">
+            Your skin and satisfaction mean everything to us. Please share what went wrong directly with our Clinic Director so we can resolve this for you immediately.
+          </p>
+        </div>
+      </div>
+
+      <textarea id="privateFeedbackText" rows="3" class="w-full text-xs p-3 rounded-xl border border-amber-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Please tell us what happened..."></textarea>
+      <input type="text" id="privateFeedbackContact" class="w-full text-xs p-2.5 rounded-xl border border-amber-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Your Phone Number / Email (for callback)">
+
+      <button id="privateFeedbackSubmitBtn" onclick="submitPrivateFeedback()" class="w-full py-2.5 bg-stone-900 text-white rounded-xl text-xs font-semibold hover:bg-stone-800 transition-colors shadow-sm">
+        Send Private Message to Clinic Director
+      </button>
+
+      <a id="privateFeedbackWhatsAppBtn" href="#" target="_blank" class="hidden w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors shadow-sm">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.047-.07-.44-.132-1.04-.374-1.782-.705-1.428-.636-2.38-2.072-2.451-2.171-.072-.099-.582-.774-.582-1.476 0-.702.369-1.047.502-1.191.134-.144.292-.18.39-.18.098 0 .197.001.282.006.091.005.213-.035.334.256.125.3.428 1.047.466 1.124.038.077.064.167.013.268-.051.101-.077.164-.153.253-.076.089-.16.199-.229.267-.076.076-.156.159-.067.312.089.153.396.654.85 1.058.585.521 1.078.682 1.231.758.153.076.243.064.333-.038.09-.102.384-.447.487-.6.102-.153.205-.128.344-.077.139.051.884.417 1.036.493.153.076.255.114.292.178.037.064.037.371-.107.776z"/></svg>
+        Chat Directly with Director on WhatsApp
+      </a>
+
+      <div id="privateFeedbackSuccess" class="hidden text-center text-xs font-semibold text-emerald-700 py-1">
+        ✓ Thank you. We have received your message and will reach out shortly.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sticky Bottom One-Tap Action Bar -->
+  <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-stone-200 p-3 z-30 shadow-lg">
+    <div class="max-w-xl mx-auto flex items-center gap-3">
+      <button onclick="copyAndOpenGoogleReview()" class="flex-1 py-3.5 px-5 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 active:scale-[0.99] text-white font-semibold rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all">
+        <!-- Google Multi-color G Icon -->
+        <svg class="w-5 h-5 shrink-0 bg-white p-0.5 rounded-full" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span class="text-sm tracking-wide">1-Tap: Copy & Post on Google</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- QR Code & Standee Modal -->
+  <div id="qrModal" class="hidden fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95">
+      <button onclick="document.getElementById('qrModal').classList.add('hidden')" class="absolute top-4 right-4 p-1.5 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-100">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+
+      <div class="text-center space-y-1">
+        <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700">
+          Reception Desk & Consultation Room QR
+        </span>
+        <h3 class="font-serif font-bold text-lg text-stone-900">Scan to Review Clinic</h3>
+        <p class="text-xs text-stone-500">Patients scan this code with their phone camera</p>
+      </div>
+
+      <div class="flex justify-center p-4 bg-stone-50 rounded-2xl border border-stone-200/80">
+        <div id="modalQrCodeContainer"></div>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block">Live Feedback URL</label>
+        <div class="flex gap-2">
+          <input type="text" id="qrUrlDisplay" readonly class="w-full text-xs bg-stone-100 p-2 rounded-lg border border-stone-200 text-stone-700">
+          <button onclick="navigator.clipboard.writeText(document.getElementById('qrUrlDisplay').value); showToast('URL copied!')" class="px-3 py-2 bg-stone-900 text-white rounded-lg text-xs font-medium hover:bg-stone-800">
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-stone-100">
+        <a href="standee.html" target="_blank" class="w-full py-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+          Open Printable Acrylic Standee / Flyer
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Settings Modal -->
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+        <div>
+          <h3 class="font-serif font-bold text-lg text-stone-900">Clinic & SEO Settings</h3>
+          <p class="text-xs text-stone-500">Configure your Google Business Profile & AI parameters</p>
+        </div>
+        <button id="closeAdminModalBtn" class="p-1.5 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-semibold text-stone-700 block mb-1">Clinic Name</label>
+          <input type="text" id="cfgClinicName" class="w-full p-2.5 rounded-xl border border-stone-200 text-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500">
+        </div>
+
+        <div>
+          <label class="font-semibold text-stone-700 block mb-1">
+            Google Review Direct Link / Place ID URL
+          </label>
+          <input type="text" id="cfgGoogleUrl" class="w-full p-2.5 rounded-xl border border-stone-200 text-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="https://search.google.com/local/writereview?placeid=...">
+          <p class="text-[10px] text-stone-400 mt-1">
+            Tip: In Google Business Profile dashboard, click "Ask for reviews" and paste your short URL here.
+          </p>
+        </div>
+
+        <div>
+          <label class="font-semibold text-stone-700 block mb-1">Doctor & Specialist Names (comma-separated)</label>
+          <input type="text" id="cfgDoctors" class="w-full p-2.5 rounded-xl border border-stone-200 text-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500">
+        </div>
+
+        <div>
+          <label class="font-semibold text-stone-700 block mb-1">Local SEO Keyword Targets</label>
+          <input type="text" id="cfgKeywords" class="w-full p-2.5 rounded-xl border border-stone-200 text-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="e.g. best laser clinic Kota, dermatologist near me, skin specialist">
+        </div>
+
+        <div class="pt-2 border-t border-stone-100">
+          <label class="font-semibold text-stone-700 block mb-1">
+            Google Gemini API Key (Optional)
+          </label>
+          <input type="password" id="cfgGeminiKey" class="w-full p-2.5 rounded-xl border border-stone-200 text-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="AIzaSy...">
+          <p class="text-[10px] text-stone-400 mt-1">
+            Leave blank to use the built-in natural humanizer engine (works 100% offline & free!). Or paste a free Gemini API key for dynamic real-time models.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-stone-100 flex flex-col gap-2">
+        <button id="saveAdminConfigBtn" class="w-full py-2.5 bg-stone-900 text-white rounded-xl text-xs font-semibold hover:bg-stone-800 transition-colors">
+          Save Settings
+        </button>
+        <a href="admin.html" target="_blank" class="w-full py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold text-center transition-colors">
+          Open Full Admin Suite (Inbox, Treatments & NFC) ➔
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

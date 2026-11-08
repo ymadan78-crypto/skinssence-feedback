@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reception Standee | Skinssence Laser and Skincare Clinic</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-card {
+        box-shadow: none !important;
+        border: 1px solid #e7e5e4 !important;
+        page-break-inside: avoid;
+        margin: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-stone-100 text-stone-900 font-sans p-6 min-h-screen flex flex-col items-center justify-center">
+
+  <!-- Print Control Bar -->
+  <div class="no-print max-w-md w-full mb-6 bg-white p-4 rounded-2xl shadow-sm border border-stone-200 flex items-center justify-between gap-3">
+    <div>
+      <h2 class="text-sm font-bold text-stone-800">Print Acrylic Standee / Flyer</h2>
+      <p class="text-xs text-stone-500">Standard 4x6" / A5 Table Tent for Reception</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="window.print()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+        Print Now
+      </button>
+    </div>
+  </div>
+
+  <!-- Standee Card Container (Designed for 4x6 inch or A5 acrylic desk display) -->
+  <div class="print-card bg-white max-w-sm w-full rounded-3xl p-7 border border-stone-200 shadow-xl text-center space-y-5 relative overflow-hidden">
+    
+    <!-- Subtle aesthetic background glow -->
+    <div class="absolute -top-16 -left-16 w-36 h-36 bg-rose-100/60 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-16 -right-16 w-36 h-36 bg-amber-100/60 rounded-full blur-2xl pointer-events-none"></div>
+
+    <!-- Clinic Header Branding -->
+    <div class="space-y-1">
+      <div class="inline-flex w-11 h-11 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 items-center justify-center text-white font-serif font-bold text-xl shadow-sm">
+        S
+      </div>
+      <h1 class="font-serif font-bold text-xl text-stone-900 leading-tight">
+        Skinssence
+      </h1>
+      <p class="text-[11px] uppercase tracking-widest text-stone-500 font-semibold">
+        Laser & Skincare Clinic • Kota
+      </p>
+    </div>
+
+    <!-- Catchy Hook -->
+    <div class="bg-rose-50/80 border border-rose-100 rounded-2xl p-3 space-y-0.5">
+      <span class="text-xs font-bold text-rose-800 tracking-wide uppercase">
+        Loved Your Treatment Today?
+      </span>
+      <p class="text-[11px] text-stone-600">
+        Review us on Google in <b>under 10 seconds</b>.<br>Our AI writes it for you!
+      </p>
+    </div>
+
+    <!-- QR Code Centerpiece -->
+    <div class="flex flex-col items-center justify-center">
+      <div class="p-3.5 bg-white rounded-2xl border-2 border-stone-900 shadow-sm inline-block">
+        <div id="standeeQrContainer"></div>
+      </div>
+      
+      <!-- Device Scan Guidance -->
+      <div class="mt-2.5 flex items-center justify-center gap-3 text-[11px] font-semibold text-stone-600">
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-stone-700" fill="currentColor" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.76 1.05-1.82.93-2.87-1 .04-2.15.67-2.81 1.43-.58.67-.99 1.76-.85 2.8 1.12.09 2.19-.57 2.73-1.36z"/></svg>
+          iPhone Camera
+        </span>
+        <span class="text-stone-300">•</span>
+        <span class="flex items-center gap-1">
+          <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8.081 12 8.081s-3.5902.3306-5.1367.8698L4.841 5.4477a.416.416 0 00-.5677-.1521.4157.4157 0 00-.152 5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+          Android Camera
+        </span>
+      </div>
+      <p class="text-[10px] text-stone-400 mt-1">
+        Just point your normal phone camera • No app download needed!
+      </p>
+    </div>
+
+    <!-- 3 Simple Step Badges -->
+    <div class="grid grid-cols-3 gap-2 pt-1 text-left">
+      <div class="bg-stone-50 rounded-xl p-2.5 border border-stone-100 text-center">
+        <span class="text-base">📱</span>
+        <div class="text-[10px] font-bold text-stone-700 mt-0.5 uppercase">1. Scan</div>
+        <p class="text-[9px] text-stone-500 leading-tight">Instant link</p>
+      </div>
+      <div class="bg-stone-50 rounded-xl p-2.5 border border-stone-100 text-center">
+        <span class="text-base">✨</span>
+        <div class="text-[10px] font-bold text-stone-700 mt-0.5 uppercase">2. Tap 3 chips</div>
+        <p class="text-[9px] text-stone-500 leading-tight">Zero typing</p>
+      </div>
+      <div class="bg-stone-50 rounded-xl p-2.5 border border-stone-100 text-center">
+        <span class="text-base">🌟</span>
+        <div class="text-[10px] font-bold text-stone-700 mt-0.5 uppercase">3. AI Posts</div>
+        <p class="text-[9px] text-stone-500 leading-tight">1-tap submit</p>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="pt-2 border-t border-stone-100 text-[10px] text-stone-400">
+      Thank you for trusting Skinssence with your skin journey!
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let targetUrl = window.location.origin;
+      const saved = localStorage.getItem("skinssence_config");
+      if (saved) {
+        try {
+          const cfg = JSON.parse(saved);
+          if (cfg.customPublicUrl) targetUrl = cfg.customPublicUrl;
+        } catch(e){}
+      }
+
+      new QRCode(document.getElementById("standeeQrContainer"), {
+        text: targetUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#1c1917",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+  </script>
+</body>
+</html>

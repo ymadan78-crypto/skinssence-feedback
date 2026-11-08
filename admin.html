@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Suite | Skinssence Laser and Skincare Clinic</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- PWA App Manifest & Mobile Web App Settings -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#e11d48">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/icon.svg">
+</head>
+<body class="bg-stone-50 text-stone-800 font-sans min-h-screen pb-16">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-500 to-amber-400 flex items-center justify-center text-white font-serif font-bold text-xl shadow-xs">
+          S
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-stone-900 text-lg leading-tight">
+            Skinssence Admin Control Suite
+          </h1>
+          <p class="text-xs text-stone-500">Fine Control • Private Feedback Inbox • Treatments • Regional SEO</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="pwaInstallBtn" onclick="installAdminApp()" class="hidden px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          📲 Install App on Phone
+        </button>
+        <a href="index.html" target="_blank" class="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+          Patient View
+        </a>
+        <a href="standee.html" target="_blank" class="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+          Standee
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+
+    <!-- TAB NAVIGATION -->
+    <div class="flex items-center gap-2 border-b border-stone-200 overflow-x-auto pb-1 text-xs font-semibold">
+      <button onclick="switchTab('inbox')" id="tabBtn_inbox" class="tab-btn px-4 py-2.5 rounded-t-xl border-b-2 border-rose-600 text-rose-700 bg-white">
+        📥 Private Feedback Inbox (1-3 Stars) <span id="inboxBadge" class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px]">0</span>
+      </button>
+      <button onclick="switchTab('treatments')" id="tabBtn_treatments" class="tab-btn px-4 py-2.5 rounded-t-xl text-stone-500 hover:text-stone-800">
+        ✨ Treatments & Services
+      </button>
+      <button onclick="switchTab('seo')" id="tabBtn_seo" class="tab-btn px-4 py-2.5 rounded-t-xl text-stone-500 hover:text-stone-800">
+        📍 Regional Cities & SEO
+      </button>
+      <button onclick="switchTab('settings')" id="tabBtn_settings" class="tab-btn px-4 py-2.5 rounded-t-xl text-stone-500 hover:text-stone-800">
+        ⚙️ Clinic & Alert Settings
+      </button>
+      <button onclick="switchTab('nfc')" id="tabBtn_nfc" class="tab-btn px-4 py-2.5 rounded-t-xl text-stone-500 hover:text-stone-800">
+        📡 NFC & QR Setup Guide
+      </button>
+    </div>
+
+    <!-- TAB 1: INBOX (1-3 Star Shield Feedback) -->
+    <div id="tabContent_inbox" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-stone-900">Private Grievance Inbox</h2>
+          <p class="text-xs text-stone-500">Unhappy patient feedback captured privately before reaching Google.</p>
+        </div>
+        <button onclick="loadFeedbacks()" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-lg text-xs font-medium text-stone-700">
+          🔄 Refresh
+        </button>
+      </div>
+
+      <div id="feedbacksListContainer" class="space-y-3">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- TAB 2: TREATMENTS MANAGER -->
+    <div id="tabContent_treatments" class="hidden space-y-4">
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-4">
+        <h3 class="text-sm font-bold text-stone-900 uppercase tracking-wider">Add New Treatment</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">Emoji Icon</label>
+            <input type="text" id="newTreatmentIcon" value="✨" class="w-full p-2.5 rounded-xl border border-stone-200">
+          </div>
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">Treatment Name</label>
+            <input type="text" id="newTreatmentLabel" placeholder="e.g. Carbon Laser Peel" class="w-full p-2.5 rounded-xl border border-stone-200">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-medium text-stone-600 mb-1">SEO Description Tag</label>
+            <input type="text" id="newTreatmentTag" placeholder="e.g. Hollywood carbon peel and skin brightening" class="w-full p-2.5 rounded-xl border border-stone-200">
+          </div>
+        </div>
+        <button onclick="addNewTreatment()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl">
+          + Add Treatment
+        </button>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-stone-900 uppercase tracking-wider">Current Treatments</h3>
+        <div id="adminTreatmentsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: REGIONAL CITIES & SEO -->
+    <div id="tabContent_seo" class="hidden space-y-4">
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-4">
+        <h3 class="text-sm font-bold text-stone-900 uppercase tracking-wider">Add City / Regional Locality</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">City / Area Name</label>
+            <input type="text" id="newLocationLabel" placeholder="e.g. Mahaveer Nagar, Kota" class="w-full p-2.5 rounded-xl border border-stone-200">
+          </div>
+          <div>
+            <label class="block font-medium text-stone-600 mb-1">Is this in Kota local?</label>
+            <select id="newLocationIsLocal" class="w-full p-2.5 rounded-xl border border-stone-200 bg-white">
+              <option value="false">Nearby Town / District (Traveler SEO)</option>
+              <option value="true">Inside Kota (Local Area)</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button onclick="addNewLocation()" class="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-xs font-semibold rounded-xl">
+              + Add City / Locality
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-stone-900 uppercase tracking-wider">Active Regional Targets</h3>
+        <div id="adminLocationsList" class="flex flex-wrap gap-2 text-xs">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: CLINIC & ALERT SETTINGS -->
+    <div id="tabContent_settings" class="hidden space-y-4">
+      <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-4 max-w-2xl text-xs">
+        <h3 class="text-sm font-bold text-stone-900 uppercase tracking-wider">Clinic & Notification Channels</h3>
+
+        <div class="space-y-3">
+          <div>
+            <label class="font-semibold text-stone-700 block mb-1">Clinic Brand Name</label>
+            <input type="text" id="adminClinicName" class="w-full p-2.5 rounded-xl border border-stone-200">
+          </div>
+
+          <div>
+            <label class="font-semibold text-stone-700 block mb-1">Google Review Direct Link (URL)</label>
+            <input type="text" id="adminGoogleUrl" class="w-full p-2.5 rounded-xl border border-stone-200" placeholder="https://search.google.com/local/writereview?placeid=...">
+          </div>
+
+          <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 space-y-2">
+            <label class="font-bold text-amber-900 block">
+              📲 Clinic Director WhatsApp Number (For Instant 1-3 Star Alerts)
+            </label>
+            <input type="text" id="adminWhatsApp" class="w-full p-2.5 rounded-xl border border-amber-300 bg-white" placeholder="e.g. 919876543210 (Country code + 10 digits)">
+            <p class="text-[11px] text-amber-700">
+              When a patient submits 1, 2, or 3 star feedback, a direct notification can be dispatched to this WhatsApp number immediately.
+            </p>
+          </div>
+
+          <div>
+            <label class="font-semibold text-stone-700 block mb-1">Doctor & Specialist Names (comma-separated)</label>
+            <input type="text" id="adminDoctors" class="w-full p-2.5 rounded-xl border border-stone-200" placeholder="Dr. Pooja, Senior Specialist">
+          </div>
+
+          <div>
+            <label class="font-semibold text-stone-700 block mb-1">Core SEO Target Keywords</label>
+            <input type="text" id="adminKeywords" class="w-full p-2.5 rounded-xl border border-stone-200">
+          </div>
+
+          <div>
+            <label class="font-semibold text-stone-700 block mb-1">Google Gemini API Key (Optional)</label>
+            <input type="password" id="adminGeminiKey" class="w-full p-2.5 rounded-xl border border-stone-200" placeholder="AIzaSy...">
+          </div>
+
+          <button onclick="saveAllSettings()" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-xs transition-colors shadow-sm">
+            Save All Configurations
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: NFC & QR SETUP GUIDE -->
+    <div id="tabContent_nfc" class="hidden space-y-4">
+      <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm space-y-5 max-w-2xl text-xs leading-relaxed">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">📡</span>
+          <div>
+            <h3 class="text-base font-bold text-stone-900">How to Make Your Standee NFC Compliant</h3>
+            <p class="text-stone-500">Patients simply tap their iPhone or Android on the standee to open the review flow.</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 border-t border-stone-100 pt-4">
+          <div class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center shrink-0">1</span>
+            <div>
+              <p class="font-bold text-stone-800">Order NFC Tags or NFC Acrylic Stands</p>
+              <p class="text-stone-500">Buy <b>NTAG213 / NTAG215 / NTAG216</b> stickers or acrylic stands (costs ₹50 - ₹150 on Amazon India or local signage printers).</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center shrink-0">2</span>
+            <div>
+              <p class="font-bold text-stone-800">Download Free App: "NFC Tools"</p>
+              <p class="text-stone-500">Available free on both <b>Apple App Store</b> and <b>Google Play Store</b>.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center shrink-0">3</span>
+            <div>
+              <p class="font-bold text-stone-800">Write Your Feedback Link into the Tag</p>
+              <ol class="list-decimal list-inside text-stone-600 space-y-1 mt-1 pl-1">
+                <li>Open <b>NFC Tools</b> on your phone.</li>
+                <li>Tap <b>Write</b> ➔ <b>Add a record</b> ➔ <b>Custom URL / URI</b>.</li>
+                <li>Paste your live feedback URL (e.g. <code id="nfcUrlHint" class="bg-stone-100 px-1 py-0.5 rounded text-rose-700">http://localhost:3000</code>).</li>
+                <li>Tap <b>Write / 1 Byte</b> and touch the back of your phone to the NFC chip. Done!</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center shrink-0">4</span>
+            <div>
+              <p class="font-bold text-stone-800">Affix Tag to Your Reception Standee</p>
+              <p class="text-stone-500">Stick the tag directly behind the QR code on your acrylic standee. Now your clinic standee supports <b>BOTH Tap (NFC)</b> and <b>Scan (QR)</b>!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let appConfig = {};
+
+    function switchTab(tabId) {
+      document.querySelectorAll('[id^="tabContent_"]').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-b-2', 'border-rose-600', 'text-rose-700', 'bg-white');
+        btn.classList.add('text-stone-500');
+      });
+
+      const activeContent = document.getElementById(`tabContent_${tabId}`);
+      const activeBtn = document.getElementById(`tabBtn_${tabId}`);
+      if (activeContent) activeContent.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.classList.add('border-b-2', 'border-rose-600', 'text-rose-700', 'bg-white');
+        activeBtn.classList.remove('text-stone-500');
+      }
+
+      if (tabId === 'inbox') loadFeedbacks();
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config');
+        appConfig = await res.json();
+        
+        document.getElementById('adminClinicName').value = appConfig.clinicName || '';
+        document.getElementById('adminGoogleUrl').value = appConfig.googleReviewUrl || '';
+        document.getElementById('adminWhatsApp').value = appConfig.directorWhatsApp || '';
+        document.getElementById('adminDoctors').value = (appConfig.doctorNames || []).join(', ');
+        document.getElementById('adminKeywords').value = appConfig.locationKeywords || '';
+        document.getElementById('adminGeminiKey').value = appConfig.geminiApiKey || '';
+
+        renderAdminTreatments();
+        renderAdminLocations();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderAdminTreatments() {
+      const container = document.getElementById('adminTreatmentsList');
+      if (!container || !appConfig.treatments) return;
+      container.innerHTML = appConfig.treatments.map((t, idx) => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 bg-stone-50">
+          <div class="flex items-center gap-2">
+            <span>${t.icon}</span>
+            <div>
+              <p class="font-bold text-stone-800">${t.label}</p>
+              <p class="text-[10px] text-stone-500">${t.tag}</p>
+            </div>
+          </div>
+          <button onclick="removeTreatment(${idx})" class="text-rose-600 hover:text-rose-800 font-bold px-2 py-1">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function renderAdminLocations() {
+      const container = document.getElementById('adminLocationsList');
+      if (!container || !appConfig.locations) return;
+      container.innerHTML = appConfig.locations.map((loc, idx) => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs ${loc.isLocal ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-stone-100 border-stone-200 text-stone-700'}">
+          ${loc.label} ${loc.isLocal ? '(Kota)' : '(Regional)'}
+          <button onclick="removeLocation(${idx})" class="text-stone-400 hover:text-rose-600 ml-1 font-bold">✕</button>
+        </span>
+      `).join('');
+    }
+
+    async function addNewTreatment() {
+      const icon = document.getElementById('newTreatmentIcon').value.trim() || '✨';
+      const label = document.getElementById('newTreatmentLabel').value.trim();
+      const tag = document.getElementById('newTreatmentTag').value.trim() || label;
+
+      if (!label) return alert('Please enter treatment name');
+      const id = label.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+      appConfig.treatments.push({ id, label, icon, tag });
+      renderAdminTreatments();
+      await saveConfigToServer();
+      document.getElementById('newTreatmentLabel').value = '';
+      document.getElementById('newTreatmentTag').value = '';
+      alert('Treatment added successfully!');
+    }
+
+    async function removeTreatment(index) {
+      if (!confirm('Remove this treatment?')) return;
+      appConfig.treatments.splice(index, 1);
+      renderAdminTreatments();
+      await saveConfigToServer();
+    }
+
+    async function addNewLocation() {
+      const label = document.getElementById('newLocationLabel').value.trim();
+      const isLocal = document.getElementById('newLocationIsLocal').value === 'true';
+
+      if (!label) return alert('Please enter city/locality name');
+      const id = label.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+      appConfig.locations.push({ id, label, isLocal });
+      renderAdminLocations();
+      await saveConfigToServer();
+      document.getElementById('newLocationLabel').value = '';
+      alert('Location added successfully!');
+    }
+
+    async function removeLocation(index) {
+      appConfig.locations.splice(index, 1);
+      renderAdminLocations();
+      await saveConfigToServer();
+    }
+
+    async function saveAllSettings() {
+      appConfig.clinicName = document.getElementById('adminClinicName').value.trim();
+      appConfig.googleReviewUrl = document.getElementById('adminGoogleUrl').value.trim();
+      appConfig.directorWhatsApp = document.getElementById('adminWhatsApp').value.trim();
+      appConfig.doctorNames = document.getElementById('adminDoctors').value.split(',').map(s=>s.trim()).filter(Boolean);
+      appConfig.locationKeywords = document.getElementById('adminKeywords').value.trim();
+      appConfig.geminiApiKey = document.getElementById('adminGeminiKey').value.trim();
+
+      await saveConfigToServer();
+      alert('Settings saved successfully!');
+    }
+
+    async function saveConfigToServer() {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(appConfig)
+      });
+      // Also sync to localStorage
+      localStorage.setItem('skinssence_config', JSON.stringify(appConfig));
+    }
+
+    async function loadFeedbacks() {
+      const container = document.getElementById('feedbacksListContainer');
+      const badge = document.getElementById('inboxBadge');
+      if (!container) return;
+
+      try {
+        const res = await fetch('/api/feedback');
+        const list = await res.json();
+        badge.innerText = list.length;
+
+        if (!list.length) {
+          container.innerHTML = `
+            <div class="bg-white p-8 rounded-2xl border border-stone-200 text-center text-stone-400 text-xs">
+              🎉 No negative reviews or grievances received! Your clinic reputation is 100% clean.
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = list.map(item => `
+          <div class="bg-white p-4 rounded-2xl border ${item.status === 'NEW' ? 'border-amber-300 ring-1 ring-amber-300/40' : 'border-stone-200'} space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${item.status === 'NEW' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                  ${item.status}
+                </span>
+                <span class="text-amber-500 font-bold">${'★'.repeat(item.rating)}${'☆'.repeat(5 - item.rating)}</span>
+                <span class="text-stone-400">${new Date(item.timestamp).toLocaleString()}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                ${item.status === 'NEW' ? `<button onclick="updateFeedbackStatus('${item.id}', 'RESOLVED')" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg font-semibold">Mark Resolved</button>` : ''}
+              </div>
+            </div>
+
+            <p class="text-stone-800 font-medium bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+              "${item.message}"
+            </p>
+
+            <div class="flex items-center justify-between pt-1 text-[11px] text-stone-500">
+              <span>Treatment: <b>${item.treatment}</b></span>
+              <span>Contact: <b>${item.contact}</b></span>
+              <div class="flex gap-2">
+                ${item.contact && item.contact !== 'Not provided' ? `
+                  <a href="tel:${item.contact}" class="px-2 py-1 bg-stone-100 hover:bg-stone-200 rounded font-bold text-stone-700">📞 Call</a>
+                  <a href="https://wa.me/${item.contact.replace(/[^0-9]/g, '')}" target="_blank" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 rounded font-bold text-emerald-800">💬 WhatsApp</a>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function updateFeedbackStatus(id, status) {
+      await fetch(`/api/feedback/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      loadFeedbacks();
+    }
+
+    // PWA Install Prompt Logic
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBtn = document.getElementById('pwaInstallBtn');
+      if (installBtn) installBtn.classList.remove('hidden');
+    });
+
+    async function installAdminApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          document.getElementById('pwaInstallBtn')?.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      } else {
+        alert('To install on your phone:\n- Android Chrome: Tap ⋮ (top right) -> "Install app" or "Add to Home screen"\n- iPhone Safari: Tap Share ➔ "Add to Home Screen"');
+      }
+    }
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration note:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadConfig();
+      loadFeedbacks();
+      const nfcHint = document.getElementById('nfcUrlHint');
+      if (nfcHint) nfcHint.innerText = window.location.origin;
+
+      // Always show install button on mobile if not standalone
+      if (!window.matchMedia('(display-mode: standalone)').matches) {
+        const installBtn = document.getElementById('pwaInstallBtn');
+        if (installBtn) installBtn.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
