@@ -1,0 +1,12 @@
+{
+  "name": "skinssence-patient-feedback-ai",
+  "version": "1.0.0",
+  "description": "Frictionless AI-powered patient review generator for Skinssence Laser and Skincare Clinic",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
