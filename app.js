@@ -5,24 +5,26 @@
 const DEFAULT_CONFIG = {
   clinicName: "Skinssence Laser and Skincare Clinic",
   googleReviewUrl: "https://search.google.com/local/writereview?placeid=ChIJExamplePlaceID",
+  directorWhatsApp: "919876543210",
+  directorEmail: "director@skinssence.com",
   doctorNames: ["Dr. Ashima Madan", "Senior Skin Specialist"],
   locationKeywords: "best laser clinic Kota, skin doctor near me, skin specialist Kota, skin clinic Talwandi",
   geminiApiKey: ""
 };
 
-// Treatment Options with Icons and SEO Tags
+// Core Clinical Treatments (Botox & Fillers removed as clinic doesn't offer them)
 const TREATMENTS = [
-  { id: "laser_hair", label: "Laser Hair Reduction", icon: "•", tag: "painless laser hair reduction" },
-  { id: "hydrafacial", label: "HydraFacial / Medi-Facial", icon: "•", tag: "HydraFacial glow treatment" },
-  { id: "acne_scars", label: "Acne & Scar Treatment", icon: "•", tag: "acne scar removal and skin texture" },
-  { id: "brightening", label: "Skin Brightening & Peels", icon: "•", tag: "chemical peel and skin brightening" },
-  { id: "anti_aging", label: "Anti-Aging & Botox/Fillers", icon: "•", tag: "anti-aging treatment and rejuvenation" },
-  { id: "pigmentation", label: "Pigmentation & Melasma", icon: "•", tag: "pigmentation and dark spot removal" },
-  { id: "hair_prp", label: "Hair Restoration / PRP", icon: "•", tag: "PRP hair therapy" },
-  { id: "consultation", label: "Skin Doctor Consultation", icon: "•", tag: "expert skin specialist consultation" }
+  { id: "laser_hair", label: "Laser Hair Reduction", tag: "painless laser hair reduction" },
+  { id: "hydrafacial", label: "HydraFacial / Medi-Facial", tag: "HydraFacial glow treatment" },
+  { id: "acne_scars", label: "Acne & Scar Treatment", tag: "acne scar removal and skin texture" },
+  { id: "brightening", label: "Skin Brightening & Peels", tag: "chemical peel and skin brightening" },
+  { id: "pigmentation", label: "Pigmentation & Melasma", tag: "pigmentation and dark spot removal" },
+  { id: "hair_prp", label: "Hair Restoration / PRP", tag: "PRP hair therapy" },
+  { id: "consultation", label: "Skin Doctor Consultation", tag: "expert skin specialist consultation" },
+  { id: "other_procedure", label: "Other Procedure", tag: "specialized clinical skin procedure" }
 ];
 
-// Highlight Chips (What patients loved)
+// Highlight Chips (What patients loved - Multiple select allowed)
 const HIGHLIGHTS = [
   { id: "doctor_expert", label: "Dr. Ashima's Expert Advice" },
   { id: "painless", label: "Quick & Painless" },
@@ -31,6 +33,14 @@ const HIGHLIGHTS = [
   { id: "friendly_staff", label: "Polite & Caring Staff" },
   { id: "punctual", label: "On-Time Appointment" },
   { id: "clear_aftercare", label: "Clear Guidance" }
+];
+
+// Doctor & Focus Chips
+const DOCTOR_FOCUS_OPTIONS = [
+  { id: "dr_ashima", label: "Dr. Ashima Madan" },
+  { id: "skin_doctor", label: "Skin Doctor" },
+  { id: "cosmetologist", label: "Medical Cosmetologist" },
+  { id: "skincare_clinic", label: "Skincare Clinic" }
 ];
 
 // Regional Cities / Localities for Local SEO
@@ -60,11 +70,11 @@ const DURATIONS = [
   { id: "chronic", label: "Chronic (3+ years)", text: "for a long time" }
 ];
 
-// App State
+// App State (Supports multiple treatments and multiple highlights!)
 let state = {
-  selectedTreatment: null,
+  selectedTreatments: new Set(),
   selectedHighlights: new Set(),
-  selectedDoctor: "Dr. Ashima Madan",
+  selectedFocus: "dr_ashima",
   selectedLocation: null,
   selectedDuration: null,
   customNote: "",
@@ -73,12 +83,21 @@ let state = {
   config: { ...DEFAULT_CONFIG }
 };
 
+// Clean out any legacy cached names
+function sanitizeConfig(cfg) {
+  cfg.doctorNames = ["Dr. Ashima Madan", "Senior Skin Specialist"];
+  if (cfg.locationKeywords && /dermatologist/i.test(cfg.locationKeywords)) {
+    cfg.locationKeywords = cfg.locationKeywords.replace(/dermatologist/gi, "skin specialist");
+  }
+}
+
 // Load Saved Config from Server and LocalStorage
 async function loadConfig() {
   const saved = localStorage.getItem("skinssence_config");
   if (saved) {
     try {
       state.config = { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+      sanitizeConfig(state.config);
     } catch (e) {
       console.error("Error loading local config", e);
     }
@@ -89,42 +108,35 @@ async function loadConfig() {
     if (res.ok) {
       const serverCfg = await res.json();
       state.config = { ...state.config, ...serverCfg };
+      sanitizeConfig(state.config);
       
-      if (serverCfg.treatments && serverCfg.treatments.length) {
-        TREATMENTS.length = 0;
-        TREATMENTS.push(...serverCfg.treatments);
-      }
       if (serverCfg.locations && serverCfg.locations.length) {
         LOCATIONS.length = 0;
         LOCATIONS.push(...serverCfg.locations);
       }
       
       renderTreatments();
+      renderHighlights();
       renderDoctorChips();
       renderLocations();
       updateUIBranding();
     }
-  } catch (err) {
-    // Offline / static fallback
-  }
+  } catch (err) {}
+
+  sanitizeConfig(state.config);
+  state.selectedFocus = "dr_ashima";
+  localStorage.setItem("skinssence_config", JSON.stringify(state.config));
 
   // Pre-generate the review immediately so the box is NEVER empty
   generateReviewAction();
 }
 
-function saveConfig(newConfig) {
-  state.config = { ...state.config, ...newConfig };
-  localStorage.setItem("skinssence_config", JSON.stringify(state.config));
-  updateUIBranding();
-}
-
 // Single Best Humanized & SEO-Optimized Review Generator
-// Generates ONE perfect, authentic, natural review (even if client selects nothing)
-function buildSingleBestReview(treatmentObj, highlightsList, doctor, locationObj, durationObj, customNote, clinicName) {
-  const doc = doctor || "Dr. Ashima Madan";
+// Handles multiple treatments, multiple highlights, custom procedures, and focus
+function buildSingleBestReview(treatmentIds, highlightsList, focusId, locationObj, durationObj, customNote, clinicName) {
   const clinic = clinicName || "Skinssence Laser and Skincare Clinic";
 
-  // 1. Location Hook (Local SEO for Kota and neighboring areas)
+  // 1. Location Hook (Local SEO for Kota and surrounding districts)
   let locationHook = "";
   if (locationObj) {
     if (locationObj.isLocal) {
@@ -140,40 +152,77 @@ function buildSingleBestReview(treatmentObj, highlightsList, doctor, locationObj
     durationHook = `I had been dealing with this skin issue ${durationObj.text}, `;
   }
 
-  // 3. Opening Sentence
-  const defaultOpenings = [
-    `Had a wonderful experience at ${clinic} in Kota!`,
-    `Really impressed with the treatment and service at ${clinic}.`,
-    `Visited ${clinic} in Kota and I am genuinely pleased with the results.`
-  ];
-  const opening = defaultOpenings[Math.floor(Math.random() * defaultOpenings.length)];
+  // 3. Opening & Focus Sentence based on chosen chip
+  let opening = "";
+  let focusSentence = "";
+  let closer = "";
 
-  // 4. Treatment detail
-  let treatmentPart = "";
-  if (treatmentObj) {
-    const treatmentDetails = {
-      laser_hair: "The laser hair reduction was virtually painless and done with great comfort.",
-      hydrafacial: "My skin felt deeply cleansed, hydrated, and glowing right after the HydraFacial session.",
-      acne_scars: "Noticeable improvement in my skin texture and acne scars even after the initial session.",
-      brightening: "The peel gave my face an instant fresh, radiant glow without any irritation.",
-      anti_aging: "The results look completely refreshed and natural. Very pleased with the subtlety.",
-      pigmentation: "Seeing visible lightening of dark spots and pigmentation.",
-      hair_prp: "The PRP procedure was done very gently with clear aftercare steps.",
-      consultation: `${doc} spent thorough time analyzing my skin concerns and suggested a very practical regimen.`
-    };
-    treatmentPart = treatmentDetails[treatmentObj.id] || `The ${treatmentObj.label} was done very professionally.`;
+  if (focusId === "skin_doctor") {
+    opening = `If you are searching for a genuine, experienced skin doctor in Kota, ${clinic} is the best place to go.`;
+    focusSentence = `Dr. Ashima Madan is an excellent skin doctor who takes the time to explain the root cause and treatments patiently.`;
+    closer = `Definitely the most trusted skin doctor and clinic in Kota. 5 stars!`;
+  } else if (focusId === "cosmetologist") {
+    opening = `Visited ${clinic} in Kota and I am genuinely impressed with the aesthetic results.`;
+    focusSentence = `Dr. Ashima Madan is a highly knowledgeable medical cosmetologist with great precision in aesthetic and laser treatments.`;
+    closer = `Top recommendation for anyone looking for a certified medical cosmetologist in Kota!`;
+  } else if (focusId === "skincare_clinic") {
+    opening = `Easily the cleanest, most modern, and reliable skincare clinic in Kota.`;
+    focusSentence = `Skinssence Skincare Clinic offers state-of-the-art laser technology and caring service under Dr. Ashima Madan.`;
+    closer = `The staff is lovely and results speak for themselves. Best skincare clinic in Kota!`;
   } else {
-    // If client selects NO treatment, provide a clean, natural consultation & skin treatment review
-    treatmentPart = `${doc} took the time to understand my skin and gave honest, genuine advice without any unnecessary procedures.`;
+    // Default: Dr. Ashima Madan
+    opening = `Had a wonderful experience at ${clinic} in Kota!`;
+    focusSentence = `Dr. Ashima Madan is very patient, thoroughly analyzed my skin, and recommended honest treatments without unnecessary procedures.`;
+    closer = `Definitely one of the best skin specialists and laser clinics in Kota. Highly recommended!`;
   }
 
-  // 5. Highlights
+  // 4. Treatments detail (Handles 0, 1, or MULTIPLE treatments naturally)
+  let treatmentPart = "";
+  const selectedTreatmentsArray = TREATMENTS.filter(t => treatmentIds.includes(t.id));
+
+  if (selectedTreatmentsArray.length > 0) {
+    const treatmentNames = selectedTreatmentsArray
+      .filter(t => t.id !== "other_procedure")
+      .map(t => t.label);
+
+    if (treatmentNames.length > 0) {
+      const joinedNames = treatmentNames.length === 1 
+        ? treatmentNames[0] 
+        : treatmentNames.slice(0, -1).join(", ") + " and " + treatmentNames[treatmentNames.length - 1];
+      
+      treatmentPart = `I visited for ${joinedNames}. `;
+
+      // Add specific experiential detail
+      if (treatmentIds.includes("laser_hair")) {
+        treatmentPart += "The laser session was virtually painless and carried out with great comfort. ";
+      }
+      if (treatmentIds.includes("hydrafacial")) {
+        treatmentPart += "My skin felt deeply cleansed, hydrated, and glowing right after the HydraFacial. ";
+      }
+      if (treatmentIds.includes("acne_scars")) {
+        treatmentPart += "Noticeable improvement in my skin texture and scars even after the initial session. ";
+      }
+      if (treatmentIds.includes("brightening")) {
+        treatmentPart += "The peel gave my face an instant radiant glow without any irritation. ";
+      }
+      if (treatmentIds.includes("pigmentation")) {
+        treatmentPart += "Seeing visible lightening of dark spots and pigmentation. ";
+      }
+      if (treatmentIds.includes("hair_prp")) {
+        treatmentPart += "The PRP procedure was done very gently with clear aftercare steps. ";
+      }
+    } else if (treatmentIds.includes("other_procedure")) {
+      treatmentPart = "The clinical procedure was carried out with extreme care and precision. ";
+    }
+  }
+
+  // 5. Highlights (Multiple highlights naturally merged)
   let highlightPhrases = [];
   if (highlightsList.includes("hygiene")) {
     highlightPhrases.push("The clinic is spotlessly clean and maintains high hygiene standards.");
   }
   if (highlightsList.includes("doctor_expert")) {
-    highlightPhrases.push(`${doc} is very experienced and explains every step patiently.`);
+    highlightPhrases.push("Doctor explained every step of the procedure patiently.");
   }
   if (highlightsList.includes("friendly_staff")) {
     highlightPhrases.push("The staff is polite, courteous, and very helpful.");
@@ -188,37 +237,30 @@ function buildSingleBestReview(treatmentObj, highlightsList, doctor, locationObj
     highlightPhrases.push("Zero waiting time and punctual appointments.");
   }
   if (highlightPhrases.length === 0) {
-    highlightPhrases.push("The staff is very polite and the clinic is well-equipped with modern technology.");
+    highlightPhrases.push("The staff is very polite and the clinic is equipped with the latest technology.");
   }
 
   const highlightSentence = highlightPhrases.slice(0, 2).join(" ");
 
-  // 6. Custom note if any
+  // 6. Custom note if any (Patients can mention any custom procedure here!)
   let customPart = "";
   if (customNote && customNote.trim()) {
     customPart = ` Also appreciated that ${customNote.trim().replace(/\.$/, "")}.`;
   }
 
-  // 7. Closing recommendation (SEO keyword: skin specialist & laser clinic in Kota)
-  const closers = [
-    `Definitely one of the best skin specialists and laser clinics in Kota. Highly recommended!`,
-    `Would definitely recommend ${doc} and Skinssence to anyone looking for genuine skin care in Kota.`,
-    `Very happy with the care and outcome. 5 stars for the team!`
-  ];
-  const closer = closers[Math.floor(Math.random() * closers.length)];
-
-  // Compose the review
-  return `${locationHook}${opening} ${durationHook ? durationHook + 'and ' : ''}${treatmentPart} ${highlightSentence}.${customPart} ${closer}`.replace(/\s+/g, " ").trim();
+  return `${locationHook}${opening} ${durationHook ? durationHook + 'and ' : ''}${focusSentence} ${treatmentPart}${highlightSentence}.${customPart} ${closer}`.replace(/\s+/g, " ").trim();
 }
 
 // Generate the single review
 function generateReviewAction() {
   if (state.rating < 4) return;
-  const list = Array.from(state.selectedHighlights);
+  const treatmentsArray = Array.from(state.selectedTreatments);
+  const highlightsArray = Array.from(state.selectedHighlights);
+  
   const text = buildSingleBestReview(
-    state.selectedTreatment,
-    list,
-    state.selectedDoctor,
+    treatmentsArray,
+    highlightsArray,
+    state.selectedFocus,
     state.selectedLocation,
     state.selectedDuration,
     state.customNote,
@@ -230,26 +272,38 @@ function generateReviewAction() {
   if (textarea) textarea.value = text;
 }
 
-// UI Rendering
+// UI Rendering: Treatments with MULTI-SELECT support
 function renderTreatments() {
   const container = document.getElementById("treatmentChips");
   if (!container) return;
   container.innerHTML = TREATMENTS.map(t => {
-    const isSelected = state.selectedTreatment && state.selectedTreatment.id === t.id;
+    const isSelected = state.selectedTreatments.has(t.id);
     return `
       <button type="button" 
-        onclick="selectTreatment('${t.id}')"
-        class="px-3 py-2 rounded-xl border text-xs font-medium transition-all text-left ${
+        onclick="toggleTreatment('${t.id}')"
+        class="px-3 py-2 rounded-xl border text-xs font-medium transition-all text-left flex items-center justify-between ${
           isSelected 
             ? 'bg-rose-50 border-rose-500 text-rose-950 ring-1 ring-rose-500/30 font-semibold' 
             : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300'
         }">
         <span class="truncate">${t.label}</span>
+        ${isSelected ? '<span class="text-rose-600 font-bold ml-1 text-xs">✓</span>' : ''}
       </button>
     `;
   }).join("");
 }
 
+window.toggleTreatment = function(id) {
+  if (state.selectedTreatments.has(id)) {
+    state.selectedTreatments.delete(id);
+  } else {
+    state.selectedTreatments.add(id);
+  }
+  renderTreatments();
+  generateReviewAction();
+};
+
+// UI Rendering: Highlights with MULTI-SELECT support
 function renderHighlights() {
   const container = document.getElementById("highlightChips");
   if (!container) return;
@@ -258,36 +312,53 @@ function renderHighlights() {
     return `
       <button type="button" 
         onclick="toggleHighlight('${h.id}')"
-        class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
+        class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all flex items-center gap-1 ${
           isSelected 
-            ? 'bg-stone-900 border-stone-900 text-white shadow-xs' 
+            ? 'bg-stone-900 border-stone-900 text-white shadow-xs font-semibold' 
             : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
         }">
-        ${h.label}
+        <span>${h.label}</span>
+        ${isSelected ? '<span class="text-emerald-400 font-bold text-[10px]">✓</span>' : ''}
       </button>
     `;
   }).join("");
 }
 
+window.toggleHighlight = function(id) {
+  if (state.selectedHighlights.has(id)) {
+    state.selectedHighlights.delete(id);
+  } else {
+    state.selectedHighlights.add(id);
+  }
+  renderHighlights();
+  generateReviewAction();
+};
+
+// Doctor & Focus Chips
 function renderDoctorChips() {
   const container = document.getElementById("doctorChips");
   if (!container) return;
-  const docs = state.config.doctorNames || ["Dr. Ashima Madan", "Senior Skin Specialist"];
-  container.innerHTML = docs.map(name => {
-    const isSelected = state.selectedDoctor === name;
+  container.innerHTML = DOCTOR_FOCUS_OPTIONS.map(opt => {
+    const isSelected = state.selectedFocus === opt.id;
     return `
       <button type="button" 
-        onclick="selectDoctor('${name}')"
-        class="px-3 py-1 rounded-full border text-xs font-medium transition-all ${
+        onclick="selectDoctorFocus('${opt.id}')"
+        class="px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
           isSelected 
-            ? 'bg-rose-600 border-rose-600 text-white shadow-xs' 
-            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
+            ? 'bg-rose-600 border-rose-600 text-white shadow-xs font-semibold' 
+            : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300'
         }">
-        ${name}
+        ${opt.label}
       </button>
     `;
   }).join("");
 }
+
+window.selectDoctorFocus = function(id) {
+  state.selectedFocus = id;
+  renderDoctorChips();
+  generateReviewAction();
+};
 
 function renderLocations() {
   const container = document.getElementById("locationChips");
@@ -355,49 +426,18 @@ function renderStars() {
     ratingDesc.innerText = descMap[state.rating] || "";
   }
 
-  // Rating Gating
+  // Star Rating Gating: Bottom button is ALWAYS VISIBLE and ALWAYS SAYS "Submit"
   const positiveSection = document.getElementById("positiveReviewSection");
   const privateFeedbackSection = document.getElementById("privateFeedbackSection");
-  const bottomBar = document.getElementById("bottomActionBar");
   
   if (state.rating >= 4) {
     if (positiveSection) positiveSection.classList.remove("hidden");
     if (privateFeedbackSection) privateFeedbackSection.classList.add("hidden");
-    if (bottomBar) bottomBar.classList.remove("hidden");
   } else {
     if (positiveSection) positiveSection.classList.add("hidden");
     if (privateFeedbackSection) privateFeedbackSection.classList.remove("hidden");
-    if (bottomBar) bottomBar.classList.add("hidden");
   }
 }
-
-// User Actions
-window.selectTreatment = function(id) {
-  const found = TREATMENTS.find(t => t.id === id);
-  if (state.selectedTreatment && state.selectedTreatment.id === id) {
-    state.selectedTreatment = null;
-  } else {
-    state.selectedTreatment = found;
-  }
-  renderTreatments();
-  generateReviewAction();
-};
-
-window.toggleHighlight = function(id) {
-  if (state.selectedHighlights.has(id)) {
-    state.selectedHighlights.delete(id);
-  } else {
-    state.selectedHighlights.add(id);
-  }
-  renderHighlights();
-  generateReviewAction();
-};
-
-window.selectDoctor = function(name) {
-  state.selectedDoctor = name;
-  renderDoctorChips();
-  generateReviewAction();
-};
 
 window.selectLocation = function(id) {
   const found = LOCATIONS.find(l => l.id === id);
@@ -457,8 +497,17 @@ window.handleEditorChange = function(e) {
   state.currentReviewText = e.target.value;
 };
 
-// 1-Click Copy and Open Google Review Link
-window.copyAndOpenGoogleReview = async function() {
+// UNIFIED SUBMIT HANDLER:
+// Button always says "Submit" and never changes appearance!
+window.handleUniversalSubmit = async function() {
+  if (state.rating >= 4) {
+    await copyAndOpenGoogleReview();
+  } else {
+    await submitPrivateFeedback();
+  }
+};
+
+async function copyAndOpenGoogleReview() {
   const editor = document.getElementById("activeReviewTextarea");
   const reviewText = editor ? editor.value : state.currentReviewText;
 
@@ -467,7 +516,6 @@ window.copyAndOpenGoogleReview = async function() {
     return;
   }
 
-  // 1. Copy to clipboard
   try {
     await navigator.clipboard.writeText(reviewText);
   } catch (err) {
@@ -479,26 +527,26 @@ window.copyAndOpenGoogleReview = async function() {
     document.body.removeChild(tempInput);
   }
 
-  // 2. Confetti celebration
   if (window.confetti) {
     window.confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
   }
 
-  // 3. Toast
   showToast("Review copied! Opening Google...");
 
-  // 4. Open Google Review URL
   setTimeout(() => {
     const targetUrl = state.config.googleReviewUrl || "https://search.google.com";
     window.open(targetUrl, "_blank", "noopener,noreferrer");
   }, 450);
-};
+}
 
-// Private feedback submit for 1-3 stars
-window.submitPrivateFeedback = async function() {
+async function submitPrivateFeedback() {
   const message = document.getElementById("privateFeedbackText")?.value || "";
   const contact = document.getElementById("privateFeedbackContact")?.value || "";
-  const treatmentName = state.selectedTreatment ? state.selectedTreatment.label : "General";
+  
+  const selectedTreatmentsArray = Array.from(state.selectedTreatments)
+    .map(id => TREATMENTS.find(t => t.id === id)?.label)
+    .filter(Boolean);
+  const treatmentSummary = selectedTreatmentsArray.length > 0 ? selectedTreatmentsArray.join(", ") : "General";
 
   if (!message.trim()) {
     showToast("Please share a brief note so we can assist you.");
@@ -511,7 +559,7 @@ window.submitPrivateFeedback = async function() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         rating: state.rating,
-        treatment: treatmentName,
+        treatment: treatmentSummary,
         message: message.trim(),
         contact: contact.trim() || "Not provided"
       })
@@ -520,23 +568,17 @@ window.submitPrivateFeedback = async function() {
 
   const feedbackMsg = document.getElementById("privateFeedbackSuccess");
   if (feedbackMsg) feedbackMsg.classList.remove("hidden");
-  
-  const submitBtn = document.getElementById("privateFeedbackSubmitBtn");
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.classList.add("opacity-50");
-  }
 
   const waNumber = state.config.directorWhatsApp || "919876543210";
   const waBtn = document.getElementById("privateFeedbackWhatsAppBtn");
   if (waBtn) {
-    const textMsg = encodeURIComponent(`Hello Dr. Ashima, I visited Skinssence today for ${treatmentName} and had some concerns: "${message.trim()}" (Contact: ${contact})`);
+    const textMsg = encodeURIComponent(`Hello Dr. Ashima, I visited Skinssence today for ${treatmentSummary} and had some concerns: "${message.trim()}" (Contact: ${contact})`);
     waBtn.href = `https://wa.me/${waNumber}?text=${textMsg}`;
     waBtn.classList.remove("hidden");
   }
 
   showToast("Thank you. Our Director will review this personally.");
-};
+}
 
 function showToast(msg) {
   let toast = document.getElementById("appToast");
