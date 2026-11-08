@@ -4,8 +4,8 @@
 // Default Clinic Configurations
 const DEFAULT_CONFIG = {
   clinicName: "Skinssence Laser and Skincare Clinic",
-  googleReviewUrl: "https://search.google.com/local/writereview?placeid=ChIJExamplePlaceID",
-  directorWhatsApp: "919876543210",
+  googleReviewUrl: "https://g.page/r/CeJjh7hjuRReEBM/review",
+  directorWhatsApp: "919509197578",
   directorEmail: "director@skinssence.com",
   doctorNames: ["Dr. Ashima Madan", "Senior Skin Specialist"],
   locationKeywords: "best laser clinic Kota, skin doctor near me, skin specialist Kota, skin clinic Talwandi",
@@ -84,11 +84,17 @@ let state = {
   config: { ...DEFAULT_CONFIG }
 };
 
-// Clean out any legacy cached names
+// Clean out any legacy cached names or dummy links
 function sanitizeConfig(cfg) {
   cfg.doctorNames = ["Dr. Ashima Madan", "Senior Skin Specialist"];
   if (cfg.locationKeywords && /dermatologist/i.test(cfg.locationKeywords)) {
     cfg.locationKeywords = cfg.locationKeywords.replace(/dermatologist/gi, "skin specialist");
+  }
+  if (!cfg.googleReviewUrl || cfg.googleReviewUrl.includes("ExamplePlaceID")) {
+    cfg.googleReviewUrl = "https://g.page/r/CeJjh7hjuRReEBM/review";
+  }
+  if (!cfg.directorWhatsApp || cfg.directorWhatsApp.includes("9876543210") || cfg.directorWhatsApp.includes("9033512819")) {
+    cfg.directorWhatsApp = "919509197578";
   }
 }
 
@@ -725,7 +731,10 @@ async function copyAndOpenGoogleReview() {
   showToast("Review copied! Opening Google...");
 
   setTimeout(() => {
-    const targetUrl = state.config.googleReviewUrl || "https://search.google.com";
+    let targetUrl = state.config.googleReviewUrl;
+    if (!targetUrl || targetUrl.includes("ExamplePlaceID")) {
+      targetUrl = "https://g.page/r/CeJjh7hjuRReEBM/review";
+    }
     window.open(targetUrl, "_blank", "noopener,noreferrer");
   }, 450);
 }
