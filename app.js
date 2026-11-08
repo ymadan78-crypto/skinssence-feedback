@@ -80,6 +80,7 @@ let state = {
   customNote: "",
   rating: 5,
   currentReviewText: "",
+  variationIndex: 0,
   config: { ...DEFAULT_CONFIG }
 };
 
@@ -132,48 +133,139 @@ async function loadConfig() {
 }
 
 // Single Best Humanized & SEO-Optimized Review Generator
-// Handles multiple treatments, multiple highlights, custom procedures, and focus
-function buildSingleBestReview(treatmentIds, highlightsList, focusId, locationObj, durationObj, customNote, clinicName) {
+// Rotates through natural, authentic linguistic styles whenever user taps "Change wording"
+function buildSingleBestReview(treatmentIds, highlightsList, focusId, locationObj, durationObj, customNote, clinicName, variantIndex = 0) {
   const clinic = clinicName || "Skinssence Laser and Skincare Clinic";
+  const mod = Math.abs(variantIndex) % 4;
 
   // 1. Location Hook (Local SEO for Kota and surrounding districts)
   let locationHook = "";
   if (locationObj) {
     if (locationObj.isLocal) {
-      locationHook = `Living in ${locationObj.label}, I am so glad we have such an advanced skin clinic here. `;
+      const localHooks = [
+        `Living in ${locationObj.label}, I am so glad we have such an advanced skin clinic here. `,
+        `Being from ${locationObj.label}, choosing Skinssence was the best decision for my skin. `,
+        `Conveniently located near ${locationObj.label}, and the clinical care is truly top tier. `,
+        `I reside in ${locationObj.label} and Skinssence is undoubtedly our most trusted local clinic. `
+      ];
+      locationHook = localHooks[mod];
     } else {
-      locationHook = `I traveled from ${locationObj.label} to visit ${clinic} in Kota, and it was completely worth the journey! `;
+      const travelHooks = [
+        `I traveled from ${locationObj.label} to visit ${clinic} in Kota, and it was completely worth the journey! `,
+        `Came all the way from ${locationObj.label} specifically for treatment at Skinssence, and the results exceeded my expectations. `,
+        `Traveled from ${locationObj.label} to consult Dr. Ashima Madan in Kota. Highly satisfied! `,
+        `Made the trip from ${locationObj.label} and the expertise here is well worth the travel. `
+      ];
+      locationHook = travelHooks[mod];
     }
   }
 
   // 2. Duration mention
   let durationHook = "";
   if (durationObj) {
-    durationHook = `I had been dealing with this skin issue ${durationObj.text}, `;
+    const durationHooks = [
+      `I had been dealing with this skin issue ${durationObj.text}, `,
+      `Having faced this concern ${durationObj.text}, `,
+      `After struggling with this condition ${durationObj.text}, `,
+      `I had this issue persistent ${durationObj.text}, `
+    ];
+    durationHook = durationHooks[mod];
   }
 
-  // 3. Opening & Focus Sentence based on chosen chip
+  // 3. Opening, Focus, and Closer variations based on chosen focus
   let opening = "";
   let focusSentence = "";
   let closer = "";
 
   if (focusId === "skin_doctor") {
-    opening = `If you are searching for a genuine, experienced skin doctor in Kota, ${clinic} is the best place to go.`;
-    focusSentence = `Dr. Ashima Madan is an excellent skin doctor who takes the time to explain the root cause and treatments patiently.`;
-    closer = `Definitely the most trusted skin doctor and clinic in Kota. 5 stars!`;
+    const openings = [
+      `If you are searching for a genuine, experienced skin doctor in Kota, ${clinic} is the best place to go.`,
+      `Skinssence is hands down the best skin doctor clinic in Kota.`,
+      `Consulted Dr. Ashima Madan at ${clinic} after trying several other remedies.`,
+      `Great experience with the skin doctor team at ${clinic}, Kota.`
+    ];
+    const focuses = [
+      `Dr. Ashima Madan is an excellent skin doctor who takes the time to explain the root cause and treatments patiently.`,
+      `Dr. Ashima Madan treats skin concerns with genuine medical expertise and customizes every solution according to your skin type.`,
+      `As a senior skin doctor, her diagnosis was pinpoint accurate and the recommended treatment started showing visible improvements very quickly.`,
+      `Dr. Ashima Madan is so reassuring and knowledgeable. She focuses on real long-term skin health with clear guidance.`
+    ];
+    const closers = [
+      `Definitely the most trusted skin doctor and clinic in Kota. 5 stars!`,
+      `Super happy with the noticeable results. Best skin doctor in the region!`,
+      `Remarkable skin doctor with a very professional, friendly clinic.`,
+      `If you need a reliable skin doctor in Kota, Skinssence is the place to visit!`
+    ];
+    opening = openings[mod];
+    focusSentence = focuses[mod];
+    closer = closers[mod];
   } else if (focusId === "cosmetologist") {
-    opening = `Visited ${clinic} in Kota and I am genuinely impressed with the aesthetic results.`;
-    focusSentence = `Dr. Ashima Madan is a highly knowledgeable medical cosmetologist with great precision in aesthetic and laser treatments.`;
-    closer = `Top recommendation for anyone looking for a certified medical cosmetologist in Kota!`;
+    const openings = [
+      `Visited ${clinic} in Kota and I am genuinely impressed with the aesthetic results.`,
+      `Had my aesthetic session at ${clinic} and the results speak for themselves.`,
+      `If you are looking for safe, high-grade aesthetic treatments, Dr. Ashima Madan at ${clinic} is the ideal medical cosmetologist.`,
+      `Skinssence is the gold standard for clinical cosmetology in Kota.`
+    ];
+    const focuses = [
+      `Dr. Ashima Madan is a highly knowledgeable medical cosmetologist with great precision in aesthetic and laser treatments.`,
+      `Dr. Ashima Madan is such a skilled medical cosmetologist. Her technique is gentle, subtle, and gives an authentic, natural enhancement.`,
+      `The clinic uses modern US-FDA standard equipment and follows strict clinical protocols for every procedure.`,
+      `Dr. Ashima's cosmetic expertise gave my skin a refined, clear, and glowing texture without any downtime.`
+    ];
+    const closers = [
+      `Top recommendation for anyone looking for a certified medical cosmetologist in Kota!`,
+      `Best medical cosmetology and aesthetic laser clinic in Kota!`,
+      `Visible glow, flawless safety, and wonderful staff. Highly recommended!`,
+      `Grateful to Dr. Ashima Madan and the entire team at Skinssence!`
+    ];
+    opening = openings[mod];
+    focusSentence = focuses[mod];
+    closer = closers[mod];
   } else if (focusId === "skincare_clinic") {
-    opening = `Easily the cleanest, most modern, and reliable skincare clinic in Kota.`;
-    focusSentence = `Skinssence Skincare Clinic offers state-of-the-art laser technology and caring service under Dr. Ashima Madan.`;
-    closer = `The staff is lovely and results speak for themselves. Best skincare clinic in Kota!`;
+    const openings = [
+      `Easily the cleanest, most modern, and reliable skincare clinic in Kota.`,
+      `Skinssence Laser & Skincare Clinic is undoubtedly the most premium skincare centre in Kota.`,
+      `I had a very soothing and rewarding experience at ${clinic}.`,
+      `One of the best decisions to choose Skinssence Skincare Clinic for my treatment.`
+    ];
+    const focuses = [
+      `Skinssence Skincare Clinic offers state-of-the-art laser technology and caring service under Dr. Ashima Madan.`,
+      `The atmosphere is immaculate, hygiene standards are top-notch, and Dr. Ashima Madan provides expert clinical supervision.`,
+      `Their skincare equipment is modern, the therapists are well-trained, and Dr. Ashima ensures personal care for every patient.`,
+      `Very hygienic, modern clinic with a warm and welcoming environment led by Dr. Ashima Madan.`
+    ];
+    const closers = [
+      `The staff is lovely and results speak for themselves. Best skincare clinic in Kota!`,
+      `A 5-star clinic experience right here in Kota!`,
+      `Superb clinic with honest guidance. Will definitely be regular here!`,
+      `Highly satisfied with the outcomes and overall clinic service!`
+    ];
+    opening = openings[mod];
+    focusSentence = focuses[mod];
+    closer = closers[mod];
   } else {
     // Default: Dr. Ashima Madan
-    opening = `Had a wonderful experience at ${clinic} in Kota!`;
-    focusSentence = `Dr. Ashima Madan is very patient, thoroughly analyzed my skin, and recommended honest treatments without unnecessary procedures.`;
-    closer = `Definitely one of the best skin specialists and laser clinics in Kota. Highly recommended!`;
+    const openings = [
+      `Had a wonderful experience at ${clinic} in Kota!`,
+      `I had an exceptional consultation with Dr. Ashima Madan at ${clinic}.`,
+      `Finding a doctor who gives honest, transparent advice is rare, but Dr. Ashima Madan is wonderful.`,
+      `Highly impressed with the quality of care at ${clinic}, Kota.`
+    ];
+    const focuses = [
+      `Dr. Ashima Madan is very patient, thoroughly analyzed my skin, and recommended honest treatments without unnecessary procedures.`,
+      `Her diagnostic approach is so thoughtful and scientific. She genuinely listens to your concerns and explains the exact skincare routine needed.`,
+      `From the very first visit, she made me feel completely comfortable and guided me with the right clinical approach rather than pushing unnecessary treatments.`,
+      `Dr. Ashima Madan is extremely skilled, warm, and attentive. The clinic ambience is calm and premium.`
+    ];
+    const closers = [
+      `Definitely one of the best skin specialists and laser clinics in Kota. Highly recommended!`,
+      `Truly grateful for her guidance. Skinssence is easily the top clinic for advanced skin care in Kota!`,
+      `My skin feels so much healthier. Outstanding care and five-star service!`,
+      `Would definitely recommend Dr. Ashima to anyone in Kota seeking genuine, result-oriented skincare!`
+    ];
+    opening = openings[mod];
+    focusSentence = focuses[mod];
+    closer = closers[mod];
   }
 
   // 4. Treatments detail (Handles 0, 1, or MULTIPLE treatments naturally)
@@ -190,54 +282,144 @@ function buildSingleBestReview(treatmentIds, highlightsList, focusId, locationOb
         ? treatmentNames[0] 
         : treatmentNames.slice(0, -1).join(", ") + " and " + treatmentNames[treatmentNames.length - 1];
       
-      treatmentPart = `I visited for ${joinedNames}. `;
+      const intros = [
+        `I visited for ${joinedNames}. `,
+        `Came in specifically for ${joinedNames}. `,
+        `Took their session for ${joinedNames}. `,
+        `Opted for ${joinedNames} at the clinic. `
+      ];
+      treatmentPart = intros[mod];
 
       // Add specific experiential detail
       if (treatmentIds.includes("laser_hair")) {
-        treatmentPart += "The laser session was virtually painless and carried out with great comfort. ";
+        const laserPhrases = [
+          "The laser session was virtually painless and carried out with great comfort. ",
+          "The laser hair reduction procedure was extremely smooth and completely painless. ",
+          "Laser sessions are done with cooling technology, so zero discomfort. ",
+          "Very comfortable laser treatment with visible thinning after sessions. "
+        ];
+        treatmentPart += laserPhrases[mod];
       }
       if (treatmentIds.includes("hydrafacial")) {
-        treatmentPart += "My skin felt deeply cleansed, hydrated, and glowing right after the HydraFacial. ";
+        const facialPhrases = [
+          "My skin felt deeply cleansed, hydrated, and glowing right after the HydraFacial. ",
+          "Immediate radiant glow and refreshed feeling after the HydraFacial session. ",
+          "Skin texture felt super soft and hydrated, totally loved the facial. ",
+          "Instant hydration and clean glow without any redness. "
+        ];
+        treatmentPart += facialPhrases[mod];
       }
       if (treatmentIds.includes("acne_scars")) {
-        treatmentPart += "Noticeable improvement in my skin texture and scars even after the initial session. ";
+        const acnePhrases = [
+          "Noticeable improvement in my skin texture and scars even after the initial session. ",
+          "Active breakouts reduced significantly and scars are softening visibly. ",
+          "Very targeted acne treatment with genuine visible healing. ",
+          "My skin texture is noticeably clearer and smoother. "
+        ];
+        treatmentPart += acnePhrases[mod];
       }
       if (treatmentIds.includes("brightening")) {
-        treatmentPart += "The peel gave my face an instant radiant glow without any irritation. ";
+        const peelPhrases = [
+          "The peel gave my face an instant radiant glow without any irritation. ",
+          "Gentle chemical peel with immediate brightening effect and no downtime. ",
+          "Face felt refreshed and brighter within days of the session. ",
+          "Remarkable improvement in even skin tone and natural glow. "
+        ];
+        treatmentPart += peelPhrases[mod];
       }
       if (treatmentIds.includes("pigmentation")) {
-        treatmentPart += "Seeing visible lightening of dark spots and pigmentation. ";
+        const pigmPhrases = [
+          "Seeing visible lightening of dark spots and pigmentation. ",
+          "Dark patches and sun spots have lightened up considerably. ",
+          "Effective clinical treatment that significantly reduced my stubborn pigmentation. ",
+          "Skin looks much more even-toned with faded blemishes. "
+        ];
+        treatmentPart += pigmPhrases[mod];
       }
       if (treatmentIds.includes("hair_prp")) {
-        treatmentPart += "The PRP procedure was done very gently with clear aftercare steps. ";
+        const prpPhrases = [
+          "The PRP procedure was done very gently with clear aftercare steps. ",
+          "Hair fall has visibly controlled and the PRP session was handled very professionally. ",
+          "Smooth PRP procedure with minimal discomfort and great aftercare support. ",
+          "Very structured hair restoration therapy with encouraging density improvement. "
+        ];
+        treatmentPart += prpPhrases[mod];
       }
     } else if (treatmentIds.includes("other_procedure")) {
-      treatmentPart = "The clinical procedure was carried out with extreme care and precision. ";
+      const otherPhrases = [
+        "The clinical procedure was carried out with extreme care and precision. ",
+        "The procedure was handled with complete professionalism and utmost hygiene. ",
+        "Every step of the treatment was explained beforehand and conducted smoothly. ",
+        "Very satisfied with how delicately and effectively the procedure was performed. "
+      ];
+      treatmentPart = otherPhrases[mod];
     }
   }
 
   // 5. Highlights (Multiple highlights naturally merged)
   let highlightPhrases = [];
   if (highlightsList.includes("hygiene")) {
-    highlightPhrases.push("The clinic is spotlessly clean and maintains high hygiene standards.");
+    const hg = [
+      "The clinic is spotlessly clean and maintains high hygiene standards.",
+      "Super hygienic environment with sterilized equipment.",
+      "Impeccable cleanliness and a very reassuring, sanitized setup.",
+      "The clinic maintains hospital-grade sanitization."
+    ];
+    highlightPhrases.push(hg[mod]);
   }
   if (highlightsList.includes("doctor_expert")) {
-    highlightPhrases.push("Doctor explained every step of the procedure patiently.");
+    const exp = [
+      "Doctor explained every step of the procedure patiently.",
+      "Doctor answered all my questions with genuine patience.",
+      "Appreciated how thoroughly the doctor explained the treatment plan.",
+      "Very transparent consultation without rushing."
+    ];
+    highlightPhrases.push(exp[mod]);
   }
   if (highlightsList.includes("friendly_staff")) {
-    highlightPhrases.push("The staff is polite, courteous, and very helpful.");
+    const stf = [
+      "The staff is polite, courteous, and very helpful.",
+      "Warm and welcoming staff who take care of every detail.",
+      "Support staff is extremely cooperative and well-mannered.",
+      "Caring team that makes you feel relaxed right from entry."
+    ];
+    highlightPhrases.push(stf[mod]);
   }
   if (highlightsList.includes("painless")) {
-    highlightPhrases.push("The entire procedure was quick, smooth, and painless.");
+    const pnl = [
+      "The entire procedure was quick, smooth, and painless.",
+      "Zero pain and very gentle handling throughout.",
+      "Very comfortable session with no discomfort at all.",
+      "Quick and completely painless process."
+    ];
+    highlightPhrases.push(pnl[mod]);
   }
   if (highlightsList.includes("visible_glow")) {
-    highlightPhrases.push("Loved the immediate visible glow and post-treatment results.");
+    const glw = [
+      "Loved the immediate visible glow and post-treatment results.",
+      "Noticed an instant healthy glow right after the visit.",
+      "Visible results that make the visit totally worth it.",
+      "Skin looked visibly radiant and healthy."
+    ];
+    highlightPhrases.push(glw[mod]);
   }
   if (highlightsList.includes("punctual")) {
-    highlightPhrases.push("Zero waiting time and punctual appointments.");
+    const pnc = [
+      "Zero waiting time and punctual appointments.",
+      "Appreciated the on-time appointment management.",
+      "Very punctual and well-organized scheduling.",
+      "No long waiting queues, very smooth scheduling."
+    ];
+    highlightPhrases.push(pnc[mod]);
   }
   if (highlightPhrases.length === 0) {
-    highlightPhrases.push("The staff is very polite and the clinic is equipped with the latest technology.");
+    const dflt = [
+      "The staff is very polite and the clinic is equipped with the latest technology.",
+      "Modern clinic setup with very polite and accommodating staff.",
+      "High-tech equipment and a very professional atmosphere.",
+      "Calm, soothing clinic environment with courteous staff."
+    ];
+    highlightPhrases.push(dflt[mod]);
   }
 
   const highlightSentence = highlightPhrases.slice(0, 2).join(" ");
@@ -264,12 +446,20 @@ function generateReviewAction() {
     state.selectedLocation,
     state.selectedDuration,
     state.customNote,
-    state.config.clinicName
+    state.config.clinicName,
+    state.variationIndex
   );
 
   state.currentReviewText = text;
   const textarea = document.getElementById("activeReviewTextarea");
-  if (textarea) textarea.value = text;
+  if (textarea) {
+    textarea.value = text;
+    // Visual indicator that new wording has loaded
+    textarea.classList.add("ring-2", "ring-rose-400", "bg-rose-50/40");
+    setTimeout(() => {
+      textarea.classList.remove("ring-2", "ring-rose-400", "bg-rose-50/40");
+    }, 350);
+  }
 }
 
 // UI Rendering: Treatments with MULTI-SELECT support
@@ -489,8 +679,9 @@ window.toggleExpandDetails = function() {
 };
 
 window.regenerateReview = function() {
+  state.variationIndex++;
   generateReviewAction();
-  showToast("Review rephrased!");
+  showToast("Wording updated!");
 };
 
 window.handleEditorChange = function(e) {

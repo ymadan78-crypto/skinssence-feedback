@@ -28,8 +28,11 @@
   <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 shadow-xs">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white font-serif font-bold text-base shadow-xs">
-          S
+        <div class="relative flex items-center justify-center">
+          <img id="clinicHeaderLogo" src="logo.png" onload="this.style.display='block'; document.getElementById('clinicDefaultBadge').style.display='none';" onerror="this.style.display='none'; document.getElementById('clinicDefaultBadge').style.display='inline-flex';" class="h-8 max-w-[80px] object-contain hidden" alt="Skinssence Logo" />
+          <div id="clinicDefaultBadge" class="w-8 h-8 rounded-full bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white font-serif font-bold text-base shadow-xs">
+            S
+          </div>
         </div>
         <div>
           <h1 class="font-serif font-bold text-stone-900 text-sm leading-tight clinic-brand-name">
@@ -193,6 +196,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=2.1"></script>
 </body>
 </html>
