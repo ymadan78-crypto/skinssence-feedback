@@ -6,7 +6,49 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// Locate public folder flexibly (whether at root, in cwd, or subfolder)
+const possiblePublicDirs = [
+  path.join(__dirname, 'public'),
+  path.join(process.cwd(), 'public'),
+  path.join(__dirname, 'skinssence-feedback', 'public'),
+  path.join(process.cwd(), 'skinssence-feedback', 'public'),
+  __dirname
+];
+
+let publicDir = path.join(__dirname, 'public');
+for (const dir of possiblePublicDirs) {
+  if (fs.existsSync(path.join(dir, 'index.html'))) {
+    publicDir = dir;
+    console.log('Serving static files from:', publicDir);
+    break;
+  }
+}
+
+app.use(express.static(publicDir));
+
+// Explicit route handlers
+app.get('/', (req, res) => {
+  const file = path.join(publicDir, 'index.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  res.status(404).send(`
+    <h2>Skinssence Review Server is Active!</h2>
+    <p>However, <b>index.html</b> was not found in the <code>public/</code> folder on your repository.</p>
+    <p>Please make sure you uploaded the <code>public</code> folder containing <code>index.html</code>, <code>admin.html</code>, <code>standee.html</code>, and <code>app.js</code>.</p>
+    <p>Current directory files: ${fs.readdirSync(__dirname).join(', ')}</p>
+  `);
+});
+
+app.get('/admin', (req, res) => {
+  const file = path.join(publicDir, 'admin.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  res.redirect('/admin.html');
+});
+
+app.get('/standee', (req, res) => {
+  const file = path.join(publicDir, 'standee.html');
+  if (fs.existsSync(file)) return res.sendFile(file);
+  res.redirect('/standee.html');
+});
 
 // Ensure data folder exists (works on both standard servers and serverless like Vercel)
 const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'data') : path.join(__dirname, 'data');
