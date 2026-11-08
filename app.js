@@ -1,39 +1,39 @@
-// Skinssence Laser & Skincare Clinic - Patient Feedback & SEO Review Engine
+// Skinssence Laser & Skincare Clinic - Patient Feedback & Review Engine
+// Founder & Director: Dr. Ashima Madan
 
 // Default Clinic Configurations
 const DEFAULT_CONFIG = {
   clinicName: "Skinssence Laser and Skincare Clinic",
   googleReviewUrl: "https://search.google.com/local/writereview?placeid=ChIJExamplePlaceID",
-  doctorNames: ["Dr. Pooja", "Lead Dermatologist", "Senior Laser Specialist"],
-  locationKeywords: "best laser clinic Kota, dermatologist near me, skin specialist Hadoti",
+  doctorNames: ["Dr. Ashima Madan", "Senior Skin Specialist"],
+  locationKeywords: "best laser clinic Kota, skin doctor near me, skin specialist Kota, skin clinic Talwandi",
   geminiApiKey: ""
 };
 
 // Treatment Options with Icons and SEO Tags
 const TREATMENTS = [
-  { id: "laser_hair", label: "Laser Hair Reduction", icon: "✨", tag: "painless laser hair reduction" },
-  { id: "hydrafacial", label: "HydraFacial / Medi-Facial", icon: "💧", tag: "HydraFacial glow treatment" },
-  { id: "acne_scars", label: "Acne & Scar Treatment", icon: "🎯", tag: "acne scar removal and skin texture" },
-  { id: "brightening", label: "Skin Brightening & Peels", icon: "🌟", tag: "chemical peel and skin brightening" },
-  { id: "anti_aging", label: "Anti-Aging & Botox/Fillers", icon: "⏳", tag: "anti-aging treatment and rejuvenation" },
-  { id: "pigmentation", label: "Pigmentation & Melasma", icon: "🪄", tag: "pigmentation and dark spot removal" },
-  { id: "hair_prp", label: "Hair Restoration / PRP", icon: "🌿", tag: "PRP hair therapy" },
-  { id: "consultation", label: "Dermatologist Consultation", icon: "🩺", tag: "expert skin consultation" }
+  { id: "laser_hair", label: "Laser Hair Reduction", icon: "•", tag: "painless laser hair reduction" },
+  { id: "hydrafacial", label: "HydraFacial / Medi-Facial", icon: "•", tag: "HydraFacial glow treatment" },
+  { id: "acne_scars", label: "Acne & Scar Treatment", icon: "•", tag: "acne scar removal and skin texture" },
+  { id: "brightening", label: "Skin Brightening & Peels", icon: "•", tag: "chemical peel and skin brightening" },
+  { id: "anti_aging", label: "Anti-Aging & Botox/Fillers", icon: "•", tag: "anti-aging treatment and rejuvenation" },
+  { id: "pigmentation", label: "Pigmentation & Melasma", icon: "•", tag: "pigmentation and dark spot removal" },
+  { id: "hair_prp", label: "Hair Restoration / PRP", icon: "•", tag: "PRP hair therapy" },
+  { id: "consultation", label: "Skin Doctor Consultation", icon: "•", tag: "expert skin specialist consultation" }
 ];
 
-// Highlight Chips
+// Highlight Chips (What patients loved)
 const HIGHLIGHTS = [
-  { id: "painless", label: "Quick & Painless", icon: "⚡" },
-  { id: "visible_glow", label: "Immediate Visible Glow", icon: "💎" },
-  { id: "doctor_expert", label: "Doctor's In-Depth Consultation", icon: "👨‍⚕️" },
-  { id: "hygiene", label: "Ultra Clean & Modern Clinic", icon: "🧼" },
-  { id: "friendly_staff", label: "Caring & Helpful Staff", icon: "🤗" },
-  { id: "clear_aftercare", label: "Clear Post-Care Instructions", icon: "📋" },
-  { id: "punctual", label: "Zero Waiting / On-Time", icon: "⏱️" },
-  { id: "genuine_pricing", label: "Honest & Transparent Advice", icon: "🤝" }
+  { id: "doctor_expert", label: "Dr. Ashima's Expert Advice" },
+  { id: "painless", label: "Quick & Painless" },
+  { id: "visible_glow", label: "Visible Glow & Results" },
+  { id: "hygiene", label: "Spotlessly Clean Clinic" },
+  { id: "friendly_staff", label: "Polite & Caring Staff" },
+  { id: "punctual", label: "On-Time Appointment" },
+  { id: "clear_aftercare", label: "Clear Guidance" }
 ];
 
-// Regional Cities / Localities for Local SEO Power
+// Regional Cities / Localities for Local SEO
 const LOCATIONS = [
   { id: "kota", label: "Kota", isLocal: true },
   { id: "talwandi", label: "Talwandi, Kota", isLocal: true },
@@ -57,20 +57,19 @@ const DURATIONS = [
   { id: "recent", label: "Recent (1-3 months)", text: "for the past few months" },
   { id: "medium", label: "6-12 months", text: "for almost a year" },
   { id: "long", label: "1-2 years", text: "for over a year" },
-  { id: "chronic", label: "Chronic (3+ years)", text: "for a long time (over 3 years)" }
+  { id: "chronic", label: "Chronic (3+ years)", text: "for a long time" }
 ];
 
 // App State
 let state = {
   selectedTreatment: null,
   selectedHighlights: new Set(),
-  selectedDoctor: "",
+  selectedDoctor: "Dr. Ashima Madan",
   selectedLocation: null,
   selectedDuration: null,
   customNote: "",
   rating: 5,
-  activeReviewIndex: 0,
-  generatedReviews: [],
+  currentReviewText: "",
   config: { ...DEFAULT_CONFIG }
 };
 
@@ -85,14 +84,12 @@ async function loadConfig() {
     }
   }
 
-  // Also sync live config from server API (Instant OTA updates!)
   try {
     const res = await fetch("/api/config");
     if (res.ok) {
       const serverCfg = await res.json();
       state.config = { ...state.config, ...serverCfg };
       
-      // Update treatments and locations dynamically if configured on server
       if (serverCfg.treatments && serverCfg.treatments.length) {
         TREATMENTS.length = 0;
         TREATMENTS.push(...serverCfg.treatments);
@@ -108,8 +105,11 @@ async function loadConfig() {
       updateUIBranding();
     }
   } catch (err) {
-    console.log("Running in offline/static mode with local config.");
+    // Offline / static fallback
   }
+
+  // Pre-generate the review immediately so the box is NEVER empty
+  generateReviewAction();
 }
 
 function saveConfig(newConfig) {
@@ -118,192 +118,119 @@ function saveConfig(newConfig) {
   updateUIBranding();
 }
 
-// Built-in High-Entropy Humanized AI Review Engine
-// Incorporates Treatment, Doctor, Highlights, Regional Location SEO, Duration, and Custom Notes
-function generateLocalReviews(treatmentObj, highlightsList, doctor, rating, locationObj, durationObj, customNote, clinicName) {
-  const treatmentName = treatmentObj ? treatmentObj.label : "treatment";
-  const treatmentTag = treatmentObj ? treatmentObj.tag : "skin treatment";
-  const docMention = doctor ? `${doctor} and the team` : "the doctor and team";
-  const docAlt = doctor ? `${doctor}` : "the dermatologist";
+// Single Best Humanized & SEO-Optimized Review Generator
+// Generates ONE perfect, authentic, natural review (even if client selects nothing)
+function buildSingleBestReview(treatmentObj, highlightsList, doctor, locationObj, durationObj, customNote, clinicName) {
+  const doc = doctor || "Dr. Ashima Madan";
+  const clinic = clinicName || "Skinssence Laser and Skincare Clinic";
 
-  // Location phrasing (Huge for local SEO rankings in Hadoti region!)
-  let locationLead1 = "";
-  let locationLead2 = "";
-  let locationLead3 = "";
-
+  // 1. Location Hook (Local SEO for Kota and neighboring areas)
+  let locationHook = "";
   if (locationObj) {
     if (locationObj.isLocal) {
-      locationLead1 = `Living in ${locationObj.label}, `;
-      locationLead2 = `Easily the best aesthetic and skin clinic in ${locationObj.label}! `;
-      locationLead3 = `So glad to have a world-class clinic right here in ${locationObj.label}. `;
+      locationHook = `Living in ${locationObj.label}, I am so glad we have such an advanced skin clinic here. `;
     } else {
-      locationLead1 = `I traveled all the way from ${locationObj.label} to visit ${clinicName} in Kota, and it was 100% worth the journey! `;
-      locationLead2 = `Came from ${locationObj.label} specifically for my ${treatmentName}. `;
-      locationLead3 = `Being from ${locationObj.label}, finding a reputable laser & skin clinic was tough until I discovered ${clinicName} in Kota. `;
+      locationHook = `I traveled from ${locationObj.label} to visit ${clinic} in Kota, and it was completely worth the journey! `;
     }
   }
 
-  // Duration phrasing
-  let durationPhrase = "";
+  // 2. Duration mention
+  let durationHook = "";
   if (durationObj) {
-    durationPhrase = `I had been struggling with this concern ${durationObj.text}, `;
+    durationHook = `I had been dealing with this skin issue ${durationObj.text}, `;
   }
 
-  // Variation Pools for Maximum Authenticity
-  const intros1 = [
-    `${locationLead1}Had such a wonderful experience at ${clinicName}!`,
-    `Honestly so pleased with my visit to ${clinicName}. ${locationLead1}`,
-    `I was a little nervous before booking my ${treatmentName}, but ${clinicName} exceeded all expectations. ${locationLead2}`,
-    `Cannot recommend ${clinicName} enough! ${locationLead1}`
+  // 3. Opening Sentence
+  const defaultOpenings = [
+    `Had a wonderful experience at ${clinic} in Kota!`,
+    `Really impressed with the treatment and service at ${clinic}.`,
+    `Visited ${clinic} in Kota and I am genuinely pleased with the results.`
   ];
+  const opening = defaultOpenings[Math.floor(Math.random() * defaultOpenings.length)];
 
-  const intros2 = [
-    `${locationLead2}If you're searching for the best clinic for ${treatmentTag}, ${clinicName} is top-tier.`,
-    `Visited ${clinicName} for ${treatmentName} and I am genuinely impressed with their clinical standards. ${locationLead2}`,
-    `I've visited several skin clinics across the region before, but ${clinicName} stands out in every aspect. ${locationLead1}`
-  ];
+  // 4. Treatment detail
+  let treatmentPart = "";
+  if (treatmentObj) {
+    const treatmentDetails = {
+      laser_hair: "The laser hair reduction was virtually painless and done with great comfort.",
+      hydrafacial: "My skin felt deeply cleansed, hydrated, and glowing right after the HydraFacial session.",
+      acne_scars: "Noticeable improvement in my skin texture and acne scars even after the initial session.",
+      brightening: "The peel gave my face an instant fresh, radiant glow without any irritation.",
+      anti_aging: "The results look completely refreshed and natural. Very pleased with the subtlety.",
+      pigmentation: "Seeing visible lightening of dark spots and pigmentation.",
+      hair_prp: "The PRP procedure was done very gently with clear aftercare steps.",
+      consultation: `${doc} spent thorough time analyzing my skin concerns and suggested a very practical regimen.`
+    };
+    treatmentPart = treatmentDetails[treatmentObj.id] || `The ${treatmentObj.label} was done very professionally.`;
+  } else {
+    // If client selects NO treatment, provide a clean, natural consultation & skin treatment review
+    treatmentPart = `${doc} took the time to understand my skin and gave honest, genuine advice without any unnecessary procedures.`;
+  }
 
-  const intros3 = [
-    `Super smooth experience at ${clinicName} for ${treatmentName}! ${locationLead3}`,
-    `5-star service at ${clinicName}! ${locationLead2}`,
-    `Loved my ${treatmentName} session at ${clinicName}. ${locationLead1}`
-  ];
-
-  // Treatment experiences
-  const treatmentPhrases = {
-    laser_hair: "The laser technology is truly advanced and virtually painless. Everything was done with so much precision and comfort.",
-    hydrafacial: "My skin felt instantly hydrated, deeply cleansed, and visibly glowing right after the session. Best facial experience ever.",
-    acne_scars: "Noticeable improvement in my skin texture and acne scars even after the initial session. The targeted approach really works.",
-    brightening: "The peel gave my skin a fresh, radiant look without any harsh irritation. Exactly what my dull skin needed.",
-    anti_aging: "The results look completely natural and refreshed. So much attention to detail and subtle artistry.",
-    pigmentation: "Seeing significant lightening of dark spots and pigmentation. The treatment protocol was tailored specifically to my skin type.",
-    hair_prp: "Very comfortable procedure with clear post-care instructions. Seeing positive progress and increased density.",
-    consultation: "The doctor spent thorough time analyzing my skin concerns without pushing unnecessary products or packages."
-  };
-
-  const defaultTreatmentExp = `The ${treatmentName} was carried out so gently and professionally with noticeable results right away.`;
-  const selectedExp = (treatmentObj && treatmentPhrases[treatmentObj.id]) || defaultTreatmentExp;
-
-  // Highlights incorporation
+  // 5. Highlights
   let highlightPhrases = [];
   if (highlightsList.includes("hygiene")) {
-    highlightPhrases.push("The clinic is spotlessly clean, modern, and maintains the highest hygiene protocols.");
+    highlightPhrases.push("The clinic is spotlessly clean and maintains high hygiene standards.");
   }
   if (highlightsList.includes("doctor_expert")) {
-    highlightPhrases.push(`${docAlt} took the time to explain the entire procedure patiently and answered all my questions.`);
+    highlightPhrases.push(`${doc} is very experienced and explains every step patiently.`);
   }
   if (highlightsList.includes("friendly_staff")) {
-    highlightPhrases.push("The staff at reception and inside the procedure room are exceptionally courteous and welcoming.");
+    highlightPhrases.push("The staff is polite, courteous, and very helpful.");
   }
-  if (highlightsList.includes("punctual")) {
-    highlightPhrases.push("Appointment started right on time with zero unnecessary waiting.");
+  if (highlightsList.includes("painless")) {
+    highlightPhrases.push("The entire procedure was quick, smooth, and painless.");
   }
   if (highlightsList.includes("visible_glow")) {
     highlightPhrases.push("Loved the immediate visible glow and post-treatment results.");
   }
+  if (highlightsList.includes("punctual")) {
+    highlightPhrases.push("Zero waiting time and punctual appointments.");
+  }
   if (highlightPhrases.length === 0) {
-    highlightPhrases.push("From consultation to post-treatment care, the experience was seamless and reassuring.");
+    highlightPhrases.push("The staff is very polite and the clinic is well-equipped with modern technology.");
   }
 
   const highlightSentence = highlightPhrases.slice(0, 2).join(" ");
 
-  // Custom patient note if provided
-  let customSentence = "";
+  // 6. Custom note if any
+  let customPart = "";
   if (customNote && customNote.trim()) {
-    customSentence = `Also really appreciated that ${customNote.trim().replace(/\.$/, "")}. `;
+    customPart = ` Also appreciated that ${customNote.trim().replace(/\.$/, "")}.`;
   }
 
-  // Closers
-  const closers1 = [
-    `Already looking forward to my follow-up session. Highly recommended to anyone caring for their skin!`,
-    `Really happy with the results. If you want genuine skin care and visible results, definitely visit them.`,
-    `So glad I found this clinic! Thank you to ${docMention} for the wonderful care.`
+  // 7. Closing recommendation (SEO keyword: skin specialist & laser clinic in Kota)
+  const closers = [
+    `Definitely one of the best skin specialists and laser clinics in Kota. Highly recommended!`,
+    `Would definitely recommend ${doc} and Skinssence to anyone looking for genuine skin care in Kota.`,
+    `Very happy with the care and outcome. 5 stars for the team!`
   ];
+  const closer = closers[Math.floor(Math.random() * closers.length)];
 
-  const closers2 = [
-    `One of the cleanest and most professional aesthetic clinics in Rajasthan. 10/10 recommendation!`,
-    `Great technology, transparent consultation, and real visible outcomes. Will definitely be a regular here.`,
-    `Hands down the best place for ${treatmentTag} and aesthetic dermatology.`
-  ];
-
-  const closers3 = [
-    `Staff is lovely and results speak for themselves. Highly recommended!`,
-    `Great hygiene, prompt service, and visible difference in my skin. 5/5!`,
-    `Super happy with the outcome! Will be returning for sure.`
-  ];
-
-  const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-  // Construct 3 distinct reviews
-  const review1 = `${pickRandom(intros1)} ${durationPhrase ? durationPhrase + 'and ' : ''}I came in for ${treatmentName}. ${selectedExp} ${highlightSentence} ${customSentence}${pickRandom(closers1)}`;
-  const review2 = `${pickRandom(intros2)} ${docAlt} provided an in-depth diagnosis before starting the ${treatmentName}. ${durationPhrase ? 'After dealing with this ' + durationObj.text + ', ' : ''}${selectedExp} ${highlightSentence} ${customSentence}${pickRandom(closers2)}`;
-  const review3 = `${pickRandom(intros3)} ${selectedExp.split('.')[0]}. ${highlightPhrases[0] || 'Super clean setup and warm staff.'} ${customSentence}${pickRandom(closers3)}`;
-
-  return [
-    {
-      title: "Warm & Genuine",
-      badge: "⭐ Most Natural",
-      desc: "Authentic, relatable patient story that builds high trust.",
-      text: review1
-    },
-    {
-      title: "Regional SEO & High-Impact",
-      badge: "🚀 Best for Google Maps",
-      desc: "Packed with strategic location & clinic keywords for top ranking.",
-      text: review2
-    },
-    {
-      title: "Quick & Direct",
-      badge: "⚡ Short & Sweet",
-      desc: "Crisp and concise for fast submission.",
-      text: review3
-    }
-  ];
+  // Compose the review
+  return `${locationHook}${opening} ${durationHook ? durationHook + 'and ' : ''}${treatmentPart} ${highlightSentence}.${customPart} ${closer}`.replace(/\s+/g, " ").trim();
 }
 
-// API Generator (calls server proxy or direct Gemini if configured)
-async function generateGeminiReviews(treatmentObj, highlightsList, doctor, rating, locationObj, durationObj, customNote, config) {
-  if (!config.geminiApiKey) {
-    return generateLocalReviews(treatmentObj, highlightsList, doctor, rating, locationObj, durationObj, customNote, config.clinicName);
-  }
+// Generate the single review
+function generateReviewAction() {
+  if (state.rating < 4) return;
+  const list = Array.from(state.selectedHighlights);
+  const text = buildSingleBestReview(
+    state.selectedTreatment,
+    list,
+    state.selectedDoctor,
+    state.selectedLocation,
+    state.selectedDuration,
+    state.customNote,
+    state.config.clinicName
+  );
 
-  try {
-    const res = await fetch("/api/generate-review", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        treatment: treatmentObj ? treatmentObj.label : "Skin Treatment",
-        highlights: highlightsList,
-        doctorName: doctor,
-        rating: rating,
-        clinicName: config.clinicName,
-        locationKeywords: config.locationKeywords,
-        patientCity: locationObj ? locationObj.label : "",
-        concernDuration: durationObj ? durationObj.label : "",
-        customNote: customNote || "",
-        apiKey: config.geminiApiKey
-      })
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      if (data.reviews && data.reviews.length >= 3) {
-        return data.reviews.map((r, i) => ({
-          title: r.title || (i === 0 ? "Warm & Genuine" : i === 1 ? "Regional SEO & High-Impact" : "Quick & Direct"),
-          badge: r.badge || (i === 0 ? "⭐ Most Natural" : i === 1 ? "🚀 Best for Google Maps" : "⚡ Short & Sweet"),
-          desc: i === 0 ? "Authentic personal patient story." : i === 1 ? "Optimized with location and doctor keywords." : "Short and crisp.",
-          text: r.text
-        }));
-      }
-    }
-  } catch (err) {
-    console.warn("Backend Gemini endpoint unavailable, falling back to smart local engine:", err);
-  }
-
-  return generateLocalReviews(treatmentObj, highlightsList, doctor, rating, locationObj, durationObj, customNote, config.clinicName);
+  state.currentReviewText = text;
+  const textarea = document.getElementById("activeReviewTextarea");
+  if (textarea) textarea.value = text;
 }
 
-// UI Rendering Functions
+// UI Rendering
 function renderTreatments() {
   const container = document.getElementById("treatmentChips");
   if (!container) return;
@@ -312,12 +239,11 @@ function renderTreatments() {
     return `
       <button type="button" 
         onclick="selectTreatment('${t.id}')"
-        class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 text-left ${
+        class="px-3 py-2 rounded-xl border text-xs font-medium transition-all text-left ${
           isSelected 
-            ? 'bg-rose-50 border-rose-500 text-rose-950 ring-2 ring-rose-500/20 shadow-sm' 
-            : 'bg-white border-stone-200 text-stone-700 hover:border-rose-300 hover:bg-stone-50'
+            ? 'bg-rose-50 border-rose-500 text-rose-950 ring-1 ring-rose-500/30 font-semibold' 
+            : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300'
         }">
-        <span class="text-base">${t.icon}</span>
         <span class="truncate">${t.label}</span>
       </button>
     `;
@@ -332,13 +258,12 @@ function renderHighlights() {
     return `
       <button type="button" 
         onclick="toggleHighlight('${h.id}')"
-        class="flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition-all duration-200 ${
+        class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
           isSelected 
-            ? 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 shadow-sm' 
-            : 'bg-white border-stone-200 text-stone-600 hover:border-emerald-300 hover:bg-stone-50'
+            ? 'bg-stone-900 border-stone-900 text-white shadow-xs' 
+            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
         }">
-        <span>${h.icon}</span>
-        <span>${h.label}</span>
+        ${h.label}
       </button>
     `;
   }).join("");
@@ -347,16 +272,16 @@ function renderHighlights() {
 function renderDoctorChips() {
   const container = document.getElementById("doctorChips");
   if (!container) return;
-  const docs = state.config.doctorNames || [];
+  const docs = state.config.doctorNames || ["Dr. Ashima Madan", "Senior Skin Specialist"];
   container.innerHTML = docs.map(name => {
     const isSelected = state.selectedDoctor === name;
     return `
       <button type="button" 
         onclick="selectDoctor('${name}')"
-        class="px-3 py-1.5 rounded-full border text-xs font-medium transition-all ${
+        class="px-3 py-1 rounded-full border text-xs font-medium transition-all ${
           isSelected 
-            ? 'bg-stone-900 border-stone-900 text-white shadow-sm' 
-            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-400'
+            ? 'bg-rose-600 border-rose-600 text-white shadow-xs' 
+            : 'bg-white border-stone-200 text-stone-600 hover:border-stone-300'
         }">
         ${name}
       </button>
@@ -375,7 +300,7 @@ function renderLocations() {
         class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
           isSelected 
             ? 'bg-rose-600 border-rose-600 text-white shadow-xs' 
-            : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-rose-300'
+            : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300'
         }">
         ${loc.label}
       </button>
@@ -394,7 +319,7 @@ function renderDurations() {
         class="px-2.5 py-1.5 rounded-lg border text-xs font-medium transition-all ${
           isSelected 
             ? 'bg-amber-600 border-amber-600 text-white shadow-xs' 
-            : 'bg-stone-50 border-stone-200 text-stone-700 hover:border-amber-300'
+            : 'bg-white border-stone-200 text-stone-700 hover:border-stone-300'
         }">
         ${d.label}
       </button>
@@ -409,8 +334,8 @@ function renderStars() {
   for (let i = 1; i <= 5; i++) {
     const isFilled = i <= state.rating;
     html += `
-      <button type="button" onclick="setRating(${i})" class="p-1.5 transition-transform hover:scale-125 focus:outline-none" aria-label="${i} stars">
-        <svg class="w-8 h-8 ${isFilled ? 'text-amber-400 fill-amber-400 drop-shadow-sm' : 'text-stone-300 fill-transparent stroke-stone-300'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <button type="button" onclick="setRating(${i})" class="p-1 transition-transform hover:scale-115 focus:outline-none" aria-label="${i} stars">
+        <svg class="w-8 h-8 ${isFilled ? 'text-amber-400 fill-amber-400 drop-shadow-xs' : 'text-stone-300 fill-transparent stroke-stone-300'}" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
         </svg>
       </button>
@@ -421,25 +346,28 @@ function renderStars() {
   const ratingDesc = document.getElementById("ratingDescription");
   if (ratingDesc) {
     const descMap = {
-      5: "🌟 Exceptional! (Recommended for Google)",
-      4: "😊 Very Good Experience",
-      3: "😐 Average (Let our Director help you)",
-      2: "🙁 Below Expectations",
-      1: "😞 Disappointed"
+      5: "Excellent experience",
+      4: "Very good",
+      3: "Average (Let our Director help you)",
+      2: "Below expectations",
+      1: "Disappointed"
     };
     ratingDesc.innerText = descMap[state.rating] || "";
   }
 
-  // Review Gating logic:
+  // Rating Gating
   const positiveSection = document.getElementById("positiveReviewSection");
   const privateFeedbackSection = document.getElementById("privateFeedbackSection");
+  const bottomBar = document.getElementById("bottomActionBar");
   
   if (state.rating >= 4) {
     if (positiveSection) positiveSection.classList.remove("hidden");
     if (privateFeedbackSection) privateFeedbackSection.classList.add("hidden");
+    if (bottomBar) bottomBar.classList.remove("hidden");
   } else {
     if (positiveSection) positiveSection.classList.add("hidden");
     if (privateFeedbackSection) privateFeedbackSection.classList.remove("hidden");
+    if (bottomBar) bottomBar.classList.add("hidden");
   }
 }
 
@@ -452,7 +380,7 @@ window.selectTreatment = function(id) {
     state.selectedTreatment = found;
   }
   renderTreatments();
-  triggerAutoGeneration();
+  generateReviewAction();
 };
 
 window.toggleHighlight = function(id) {
@@ -462,17 +390,13 @@ window.toggleHighlight = function(id) {
     state.selectedHighlights.add(id);
   }
   renderHighlights();
-  triggerAutoGeneration();
+  generateReviewAction();
 };
 
 window.selectDoctor = function(name) {
-  if (state.selectedDoctor === name) {
-    state.selectedDoctor = "";
-  } else {
-    state.selectedDoctor = name;
-  }
+  state.selectedDoctor = name;
   renderDoctorChips();
-  triggerAutoGeneration();
+  generateReviewAction();
 };
 
 window.selectLocation = function(id) {
@@ -483,7 +407,7 @@ window.selectLocation = function(id) {
     state.selectedLocation = found;
   }
   renderLocations();
-  triggerAutoGeneration();
+  generateReviewAction();
 };
 
 window.selectDuration = function(id) {
@@ -494,19 +418,19 @@ window.selectDuration = function(id) {
     state.selectedDuration = found;
   }
   renderDurations();
-  triggerAutoGeneration();
+  generateReviewAction();
 };
 
 window.handleCustomNoteInput = function(e) {
   state.customNote = e.target.value;
-  triggerAutoGeneration();
+  generateReviewAction();
 };
 
 window.setRating = function(r) {
   state.rating = r;
   renderStars();
   if (r >= 4) {
-    triggerAutoGeneration();
+    generateReviewAction();
   }
 };
 
@@ -524,111 +448,22 @@ window.toggleExpandDetails = function() {
   }
 };
 
-let debounceTimer = null;
-function triggerAutoGeneration() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    generateReviewsAction();
-  }, 250);
-}
-
-// Trigger Review Generation
-async function generateReviewsAction() {
-  if (state.rating < 4) return;
-  const list = Array.from(state.selectedHighlights);
-  const loadingEl = document.getElementById("aiLoadingIndicator");
-  const reviewsContainer = document.getElementById("reviewsCardsContainer");
-
-  if (loadingEl) loadingEl.classList.remove("hidden");
-  if (reviewsContainer) reviewsContainer.classList.add("opacity-50");
-
-  try {
-    const reviews = await generateGeminiReviews(
-      state.selectedTreatment,
-      list,
-      state.selectedDoctor,
-      state.rating,
-      state.selectedLocation,
-      state.selectedDuration,
-      state.customNote,
-      state.config
-    );
-    state.generatedReviews = reviews;
-    state.activeReviewIndex = 0;
-    renderReviewCards();
-  } catch (e) {
-    console.error(e);
-  } finally {
-    if (loadingEl) loadingEl.classList.add("hidden");
-    if (reviewsContainer) reviewsContainer.classList.remove("opacity-50");
-  }
-}
-
-function renderReviewCards() {
-  const container = document.getElementById("reviewsCardsContainer");
-  if (!container || !state.generatedReviews.length) return;
-
-  container.innerHTML = state.generatedReviews.map((rev, index) => {
-    const isSelected = index === state.activeReviewIndex;
-    return `
-      <div onclick="selectReviewCard(${index})" 
-        class="relative p-4 rounded-2xl border-2 transition-all cursor-pointer ${
-          isSelected 
-            ? 'border-rose-500 bg-gradient-to-br from-rose-50/70 to-white shadow-md ring-2 ring-rose-500/10' 
-            : 'border-stone-200 bg-white hover:border-stone-300'
-        }">
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-              index === 0 ? 'bg-amber-100 text-amber-800' : index === 1 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
-            }">
-              ${rev.badge}
-            </span>
-            <span class="text-xs font-medium text-stone-500">${rev.title}</span>
-          </div>
-          <div class="w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? 'border-rose-500 bg-rose-500 text-white' : 'border-stone-300'}">
-            ${isSelected ? '<svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>' : ''}
-          </div>
-        </div>
-
-        <p class="text-stone-800 text-sm leading-relaxed" id="reviewText_${index}">${rev.text}</p>
-
-        <div class="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
-          <span>Tap to select or edit below</span>
-          <span class="font-medium text-rose-600">Option ${index + 1} of 3</span>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  updateSelectedReviewEditor();
-}
-
-window.selectReviewCard = function(index) {
-  state.activeReviewIndex = index;
-  renderReviewCards();
+window.regenerateReview = function() {
+  generateReviewAction();
+  showToast("Review rephrased!");
 };
 
-function updateSelectedReviewEditor() {
-  const editor = document.getElementById("activeReviewTextarea");
-  if (!editor || !state.generatedReviews[state.activeReviewIndex]) return;
-  editor.value = state.generatedReviews[state.activeReviewIndex].text;
-}
-
 window.handleEditorChange = function(e) {
-  if (state.generatedReviews[state.activeReviewIndex]) {
-    state.generatedReviews[state.activeReviewIndex].text = e.target.value;
-  }
+  state.currentReviewText = e.target.value;
 };
 
 // 1-Click Copy and Open Google Review Link
 window.copyAndOpenGoogleReview = async function() {
-  const currentReview = state.generatedReviews[state.activeReviewIndex];
   const editor = document.getElementById("activeReviewTextarea");
-  const reviewText = editor ? editor.value : (currentReview ? currentReview.text : "");
+  const reviewText = editor ? editor.value : state.currentReviewText;
 
   if (!reviewText) {
-    showToast("Please select a treatment first!");
+    showToast("Please wait a moment...");
     return;
   }
 
@@ -646,21 +481,17 @@ window.copyAndOpenGoogleReview = async function() {
 
   // 2. Confetti celebration
   if (window.confetti) {
-    window.confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.7 }
-    });
+    window.confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
   }
 
-  // 3. Show instruction modal or toast
-  showToast("📋 Review Copied! Opening Google Reviews...");
+  // 3. Toast
+  showToast("Review copied! Opening Google...");
 
-  // 4. Open Google Review URL after 500ms
+  // 4. Open Google Review URL
   setTimeout(() => {
     const targetUrl = state.config.googleReviewUrl || "https://search.google.com";
     window.open(targetUrl, "_blank", "noopener,noreferrer");
-  }, 500);
+  }, 450);
 };
 
 // Private feedback submit for 1-3 stars
@@ -674,7 +505,6 @@ window.submitPrivateFeedback = async function() {
     return;
   }
 
-  // 1. Post to Server Admin Inbox
   try {
     await fetch("/api/feedback", {
       method: "POST",
@@ -686,11 +516,8 @@ window.submitPrivateFeedback = async function() {
         contact: contact.trim() || "Not provided"
       })
     });
-  } catch (err) {
-    console.error("Failed to post feedback to server", err);
-  }
+  } catch (err) {}
 
-  // 2. Reveal Success & WhatsApp shortcut
   const feedbackMsg = document.getElementById("privateFeedbackSuccess");
   if (feedbackMsg) feedbackMsg.classList.remove("hidden");
   
@@ -700,20 +527,15 @@ window.submitPrivateFeedback = async function() {
     submitBtn.classList.add("opacity-50");
   }
 
-  // 3. Option to WhatsApp directly to Clinic Director
   const waNumber = state.config.directorWhatsApp || "919876543210";
   const waBtn = document.getElementById("privateFeedbackWhatsAppBtn");
   if (waBtn) {
-    const textMsg = encodeURIComponent(`Hello Director, I visited Skinssence today for ${treatmentName} and had some concerns: "${message.trim()}" (Contact: ${contact})`);
+    const textMsg = encodeURIComponent(`Hello Dr. Ashima, I visited Skinssence today for ${treatmentName} and had some concerns: "${message.trim()}" (Contact: ${contact})`);
     waBtn.href = `https://wa.me/${waNumber}?text=${textMsg}`;
     waBtn.classList.remove("hidden");
   }
 
-  showToast("Thank you. Grievance recorded directly in Clinic Director's inbox.");
-};
-
-window.regenerateReviews = function() {
-  generateReviewsAction();
+  showToast("Thank you. Our Director will review this personally.");
 };
 
 function showToast(msg) {
@@ -721,28 +543,14 @@ function showToast(msg) {
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "appToast";
-    toast.className = "fixed bottom-20 left-1/2 -translate-x-1/2 bg-stone-900/95 text-white px-5 py-3 rounded-full text-xs font-medium shadow-2xl z-50 transition-all duration-300 pointer-events-none";
+    toast.className = "fixed bottom-20 left-1/2 -translate-x-1/2 bg-stone-900/95 text-white px-5 py-2.5 rounded-full text-xs font-medium shadow-2xl z-50 transition-all duration-300 pointer-events-none";
     document.body.appendChild(toast);
   }
   toast.innerText = msg;
   toast.classList.remove("opacity-0", "translate-y-2");
   setTimeout(() => {
     toast.classList.add("opacity-0", "translate-y-2");
-  }, 3500);
-}
-
-function generateQRCode(elementId, url) {
-  const container = document.getElementById(elementId);
-  if (!container || !window.QRCode) return;
-  container.innerHTML = "";
-  new QRCode(container, {
-    text: url,
-    width: 180,
-    height: 180,
-    colorDark: "#1c1917",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.H
-  });
+  }, 3000);
 }
 
 function updateUIBranding() {
@@ -750,84 +558,12 @@ function updateUIBranding() {
   clinicHeaders.forEach(el => el.innerText = state.config.clinicName);
 }
 
-// Init on Load
 document.addEventListener("DOMContentLoaded", () => {
-  loadConfig();
   renderTreatments();
   renderHighlights();
   renderDoctorChips();
   renderLocations();
   renderDurations();
   renderStars();
-  updateUIBranding();
-
-  // Pre-select first treatment and highlights for instant zero-effort experience
-  if (TREATMENTS.length > 0) {
-    state.selectedTreatment = TREATMENTS[0];
-    state.selectedHighlights.add("doctor_expert");
-    state.selectedHighlights.add("hygiene");
-    renderTreatments();
-    renderHighlights();
-    generateReviewsAction();
-  }
-
-  // QR Modal logic
-  const qrModalBtn = document.getElementById("openQrModalBtn");
-  if (qrModalBtn) {
-    qrModalBtn.addEventListener("click", () => {
-      const modal = document.getElementById("qrModal");
-      if (modal) {
-        modal.classList.remove("hidden");
-        const currentUrl = window.location.href.split("#")[0];
-        generateQRCode("modalQrCodeContainer", currentUrl);
-        const urlInput = document.getElementById("qrUrlDisplay");
-        if (urlInput) urlInput.value = currentUrl;
-      }
-    });
-  }
-
-  // Admin Modal logic
-  const adminModal = document.getElementById("adminModal");
-  const openAdminBtn = document.getElementById("openAdminModalBtn");
-  const closeAdminBtn = document.getElementById("closeAdminModalBtn");
-  const saveAdminBtn = document.getElementById("saveAdminConfigBtn");
-
-  if (openAdminBtn) {
-    openAdminBtn.addEventListener("click", () => {
-      adminModal.classList.remove("hidden");
-      document.getElementById("cfgClinicName").value = state.config.clinicName;
-      document.getElementById("cfgGoogleUrl").value = state.config.googleReviewUrl;
-      document.getElementById("cfgDoctors").value = (state.config.doctorNames || []).join(", ");
-      document.getElementById("cfgKeywords").value = state.config.locationKeywords;
-      document.getElementById("cfgGeminiKey").value = state.config.geminiApiKey || "";
-    });
-  }
-
-  if (closeAdminBtn) {
-    closeAdminBtn.addEventListener("click", () => {
-      adminModal.classList.add("hidden");
-    });
-  }
-
-  if (saveAdminBtn) {
-    saveAdminBtn.addEventListener("click", () => {
-      const docNames = document.getElementById("cfgDoctors").value
-        .split(",")
-        .map(s => s.trim())
-        .filter(Boolean);
-
-      saveConfig({
-        clinicName: document.getElementById("cfgClinicName").value.trim() || DEFAULT_CONFIG.clinicName,
-        googleReviewUrl: document.getElementById("cfgGoogleUrl").value.trim() || DEFAULT_CONFIG.googleReviewUrl,
-        doctorNames: docNames,
-        locationKeywords: document.getElementById("cfgKeywords").value.trim(),
-        geminiApiKey: document.getElementById("cfgGeminiKey").value.trim()
-      });
-
-      renderDoctorChips();
-      generateReviewsAction();
-      adminModal.classList.add("hidden");
-      showToast("Clinic settings saved!");
-    });
-  }
+  loadConfig();
 });
